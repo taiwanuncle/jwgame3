@@ -76,6 +76,9 @@ export default function App() {
   // Show chat only when in a room
   const inRoom = !!gameState?.roomCode;
 
+  // Hide floating controls during active game (GamePage has its own header controls)
+  const activeGame = gameState?.phase && !['waiting', 'game_over'].includes(gameState.phase);
+
   // Render based on phase
   let page;
   if (!gameState || !gameState.roomCode) {
@@ -93,17 +96,19 @@ export default function App() {
       {page}
       <ToastContainer toasts={toasts} onRemove={removeToast} />
 
-      {/* Global controls */}
-      <div className="global-controls">
-        <MusicToggle />
-        <button
-          className="btn btn-ghost info-toggle-btn"
-          onClick={() => setShowInfo(true)}
-          title="게임 규칙"
-        >
-          ℹ️
-        </button>
-      </div>
+      {/* Floating global controls — hidden during active game (GamePage has own header buttons) */}
+      {!activeGame && (
+        <div className="global-controls">
+          <MusicToggle />
+          <button
+            className="btn btn-ghost info-toggle-btn"
+            onClick={() => setShowInfo(true)}
+            title="게임 규칙"
+          >
+            ℹ️
+          </button>
+        </div>
+      )}
 
       {inRoom && <GlobalChat sock={sock} />}
       {showInfo && <InfoModal onClose={() => setShowInfo(false)} />}

@@ -44,8 +44,12 @@
   border-color: var(--accent);
   box-shadow: 0 0 12px var(--accent-glow);
 }
-.player-avatar {
-  font-size: 28px;
+.chr-avatar.player-chr {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 .player-info-text {
   flex: 1;

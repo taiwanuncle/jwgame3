@@ -3,10 +3,12 @@ import type { useSocket } from '../hooks/useSocket';
 import type { ToastItem } from '../components/Toast';
 import type { Card } from '../types';
 import PlayingCard from '../components/PlayingCard';
+import MusicToggle from '../components/MusicToggle';
+import InfoModal from '../components/InfoModal';
+import { getAvatarSrc } from '../utils/characters';
 import { playCardPlay, playMyTurn, playDiceRoll, playPredictionReveal, playTrickWon, playRoundEnd } from '../utils/sfx';
 import './GamePage.css';
 
-const AVATARS = ['🃏', '♠', '♥', '♦', '♣', '🎴', '👑', '🎯', '🌟', '🔥', '🎲', '🏆'];
 const SUIT_SYMBOLS: Record<string, string> = {
   spades: '♠', hearts: '♥', diamonds: '♦', clubs: '♣',
 };
@@ -38,6 +40,7 @@ export default function GamePage({ sock, addToast }: Props) {
 // ===================== HEADER =====================
 function GameHeader({ gs, sock }: { gs: NonNullable<Sock['gameState']>; sock: Sock }) {
   const [showLog, setShowLog] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
 
   return (
     <div className="game-header">
@@ -53,6 +56,8 @@ function GameHeader({ gs, sock }: { gs: NonNullable<Sock['gameState']>; sock: So
         <span className="trump-badge">♥ 트럼프</span>
       </div>
       <div className="header-right">
+        <MusicToggle />
+        <button className="btn btn-ghost btn-sm" onClick={() => setShowInfo(true)} title="게임 규칙">ℹ️</button>
         <button className="btn btn-ghost btn-sm" onClick={() => sock.leaveRoom()}>나가기</button>
       </div>
 
@@ -65,6 +70,7 @@ function GameHeader({ gs, sock }: { gs: NonNullable<Sock['gameState']>; sock: So
           </div>
         </div>
       )}
+      {showInfo && <InfoModal onClose={() => setShowInfo(false)} />}
     </div>
   );
 }
@@ -130,12 +136,10 @@ function PredictionOverlay({ gs, sock, addToast }: { gs: NonNullable<Sock['gameS
     addToast(`예측 제출: ${pred}번 승리`, 'info');
   }
 
-  // Timer
   const timeLeft = gs.timerEnd ? Math.max(0, Math.ceil((gs.timerEnd - Date.now()) / 1000)) : null;
 
   return (
     <div className="prediction-panel">
-      {/* Show hand */}
       <div className="my-hand-display">
         <label>내 손패</label>
         <div className="hand-cards">
@@ -145,7 +149,6 @@ function PredictionOverlay({ gs, sock, addToast }: { gs: NonNullable<Sock['gameS
         </div>
       </div>
 
-      {/* Prediction selector */}
       {!submitted ? (
         <div className="prediction-selector glass">
           <h3>몇 번 이길 수 있을까요?</h3>
@@ -205,10 +208,8 @@ function TrickView({ gs, sock, addToast }: { gs: NonNullable<Sock['gameState']>;
   const isMyTurn = gs.currentTurnPlayerId === gs.myId && gs.phase === 'trick_play';
   const prevTurnRef = useRef<string | null>(null);
 
-  // Get valid card IDs from server state
   const validCardIds = new Set<string>();
   if (isMyTurn && myHand.length > 0) {
-    // Calculate valid cards client-side matching server logic
     const leadSuit = gs.trickLeadSuit;
     if (!leadSuit) {
       myHand.forEach((c) => validCardIds.add(c.id));
@@ -239,14 +240,10 @@ function TrickView({ gs, sock, addToast }: { gs: NonNullable<Sock['gameState']>;
     sock.playCard(card.id);
   }
 
-  // Timer
   const timeLeft = gs.timerEnd ? Math.max(0, Math.ceil((gs.timerEnd - Date.now()) / 1000)) : null;
-
-  // Determine trick winner for highlighting
   const isTrickResult = gs.phase === 'trick_result';
   const trickWinner = sock.trickResult;
 
-  // Play SFX on trick result
   const trickSfxRef = useRef(0);
   useEffect(() => {
     if (isTrickResult && trickWinner && trickWinner.trickNumber !== trickSfxRef.current) {
@@ -263,7 +260,7 @@ function TrickView({ gs, sock, addToast }: { gs: NonNullable<Sock['gameState']>;
           const isActive = gs.currentTurnPlayerId === p.id;
           return (
             <div key={p.id} className={`opponent-card ${isActive ? 'opponent-active' : ''} ${!p.connected ? 'opponent-dc' : ''}`}>
-              <span className="opp-avatar">{AVATARS[p.avatarIndex] || '🃏'}</span>
+              <img className="chr-avatar opp-chr" src={getAvatarSrc(p.avatarIndex)} alt="" />
               <span className="opp-name">{p.nickname}</span>
               <div className="opp-stats">
                 <span className="opp-pred">예측: {p.prediction ?? '?'}</span>
@@ -275,7 +272,7 @@ function TrickView({ gs, sock, addToast }: { gs: NonNullable<Sock['gameState']>;
         })}
       </div>
 
-      {/* Trick table */}
+      {/* Trick table — cards are md size now (bigger) */}
       <div className="trick-table glass">
         <div className="trick-info">
           <span>트릭 {gs.currentTrickNumber}/{gs.totalTricksThisRound}</span>
@@ -290,13 +287,11 @@ function TrickView({ gs, sock, addToast }: { gs: NonNullable<Sock['gameState']>;
             <div key={tc.playerId} className="trick-card-slot">
               <PlayingCard
                 card={tc.card}
-                small
                 winner={isTrickResult && trickWinner?.winnerId === tc.playerId}
               />
               <span className="trick-card-name">{tc.playerName}</span>
             </div>
           ))}
-          {/* Empty slots */}
           {Array.from({ length: Math.max(0, gs.players.length - gs.trickCards.length) }, (_, i) => (
             <div key={`empty-${i}`} className="trick-card-slot trick-card-empty">
               <div className="card-placeholder" />
@@ -331,7 +326,7 @@ function TrickView({ gs, sock, addToast }: { gs: NonNullable<Sock['gameState']>;
       {/* My hand */}
       <div className="my-hand-section">
         <div className="my-player-info">
-          <span className="my-avatar">{AVATARS[me?.avatarIndex || 0]}</span>
+          <img className="chr-avatar my-chr" src={getAvatarSrc(me?.avatarIndex || 0)} alt="" />
           <span className="my-name">{me?.nickname}</span>
           <span className="my-stats">예측: {me?.prediction ?? '?'} | 승리: {me?.tricksWon ?? 0}</span>
         </div>

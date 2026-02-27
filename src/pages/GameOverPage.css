@@ -27,10 +27,28 @@
 .winner-section {
   margin-bottom: var(--gap-xl);
 }
-.winner-icon {
-  font-size: 56px;
+.winner-chr {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
   display: block;
-  margin-bottom: var(--gap-sm);
+  margin: 0 auto var(--gap-sm);
+  border: 3px solid var(--gold);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+}
+.chr-avatar-sm {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+.standings-player-cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 .winner-name {
   font-size: 1.5rem;

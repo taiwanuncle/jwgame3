@@ -2,10 +2,9 @@ import { useState } from 'react';
 import type { useSocket } from '../hooks/useSocket';
 import type { ToastItem } from '../components/Toast';
 import type { BotDifficulty } from '../types';
+import { CHARACTERS } from '../utils/characters';
 import { playClick } from '../utils/sfx';
 import './LobbyPage.css';
-
-const AVATARS = ['🃏', '♠', '♥', '♦', '♣', '🎴', '👑', '🎯', '🌟', '🔥', '🎲', '🏆'];
 
 type Sock = ReturnType<typeof useSocket>;
 type View = 'menu' | 'single' | 'create' | 'join';
@@ -98,14 +97,17 @@ export default function LobbyPage({ sock, addToast }: Props) {
         />
       </div>
       <div className="avatar-picker">
-        <label>아바타</label>
+        <label>캐릭터</label>
         <div className="avatar-grid">
-          {AVATARS.map((a, i) => (
+          {CHARACTERS.map((ch) => (
             <button
-              key={i}
-              className={`avatar-btn ${avatarIdx === i ? 'selected' : ''}`}
-              onClick={() => { setAvatarIdx(i); playClick(); }}
-            >{a}</button>
+              key={ch.id}
+              className={`avatar-btn ${avatarIdx === ch.id ? 'selected' : ''}`}
+              onClick={() => { setAvatarIdx(ch.id); playClick(); }}
+              title={ch.name}
+            >
+              <img className="avatar-img" src={ch.src} alt={ch.name} draggable={false} />
+            </button>
           ))}
         </div>
       </div>

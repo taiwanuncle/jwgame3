@@ -294,8 +294,21 @@
 .opponent-card.opponent-dc {
   opacity: 0.5;
 }
-.opp-avatar {
-  font-size: 20px;
+/* Character avatar (shared style) */
+.chr-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.opp-chr {
+  width: 28px;
+  height: 28px;
+}
+.my-chr {
+  width: 32px;
+  height: 32px;
 }
 .opp-name {
   font-weight: 600;
@@ -357,9 +370,9 @@
   color: var(--text-muted);
 }
 .trick-card-empty .card-placeholder {
-  width: 52px;
-  height: 71px;
-  border-radius: 7px;
+  width: 72px;
+  height: 97px;
+  border-radius: 10px;
   border: 2px dashed var(--glass-border);
   background: transparent;
 }
@@ -401,9 +414,7 @@
   margin-bottom: var(--gap-sm);
   justify-content: center;
 }
-.my-avatar {
-  font-size: 24px;
-}
+/* removed .my-avatar emoji — using .chr-avatar img now */
 .my-name {
   font-weight: 700;
 }

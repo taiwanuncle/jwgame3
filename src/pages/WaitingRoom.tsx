@@ -1,9 +1,8 @@
 import type { useSocket } from '../hooks/useSocket';
 import type { ToastItem } from '../components/Toast';
+import { getAvatarSrc } from '../utils/characters';
 import { playClick } from '../utils/sfx';
 import './WaitingRoom.css';
-
-const AVATARS = ['🃏', '♠', '♥', '♦', '♣', '🎴', '👑', '🎯', '🌟', '🔥', '🎲', '🏆'];
 
 type Sock = ReturnType<typeof useSocket>;
 interface Props {
@@ -41,7 +40,7 @@ export default function WaitingRoom({ sock, addToast }: Props) {
       <div className="players-list">
         {gs.players.map((p) => (
           <div key={p.id} className={`player-card glass ${p.id === gs.myId ? 'player-me' : ''}`}>
-            <span className="player-avatar">{AVATARS[p.avatarIndex] || '🃏'}</span>
+            <img className="chr-avatar player-chr" src={getAvatarSrc(p.avatarIndex)} alt="" />
             <div className="player-info-text">
               <span className="player-name">
                 {p.nickname}

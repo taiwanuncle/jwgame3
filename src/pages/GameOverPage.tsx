@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { useSocket } from '../hooks/useSocket';
+import { getAvatarSrc } from '../utils/characters';
 import { playGameOver } from '../utils/sfx';
 import confetti from 'canvas-confetti';
 import './GameOverPage.css';
@@ -34,7 +35,7 @@ export default function GameOverPage({ sock }: Props) {
         <h1 className="gameover-title">게임 종료!</h1>
 
         <div className="winner-section">
-          <span className="winner-icon">🏆</span>
+          <img className="winner-chr" src={getAvatarSrc(winner?.avatarIndex || 0)} alt="" />
           <h2 className="winner-name">{winner?.nickname}</h2>
           <p className="winner-score">{winner?.totalScore}점</p>
           {isMe && <p className="winner-you">축하합니다!</p>}
@@ -55,7 +56,8 @@ export default function GameOverPage({ sock }: Props) {
                   <td className="rank-cell">
                     {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`}
                   </td>
-                  <td>
+                  <td className="standings-player-cell">
+                    <img className="chr-avatar-sm" src={getAvatarSrc(p.avatarIndex)} alt="" />
                     {p.nickname}
                     {p.isBot && <span className="bot-tag">BOT</span>}
                     {p.id === gs.myId && <span className="me-tag">나</span>}
@@ -67,7 +69,6 @@ export default function GameOverPage({ sock }: Props) {
           </table>
         </div>
 
-        {/* Round-by-round breakdown */}
         {sorted[0]?.roundScores && sorted[0].roundScores.length > 0 && (
           <div className="round-breakdown">
             <h3>라운드별 점수</h3>

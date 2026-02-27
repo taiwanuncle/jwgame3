@@ -47,7 +47,24 @@ const RANK_VALUES = {
 };
 const TRUMP_SUIT = 'hearts';
 
-const BOT_NAMES = ['봇1', '봇2', '봇3', '봇4', '봇5', '봇6'];
+const BOT_PROFILES = [
+  { name: '신중한 곰', avatarIndex: 0 },
+  { name: '도도한 고양이', avatarIndex: 1 },
+  { name: '순진한 병아리', avatarIndex: 2 },
+  { name: '충직한 강아지', avatarIndex: 3 },
+  { name: '교활한 여우', avatarIndex: 4 },
+  { name: '여유로운 개구리', avatarIndex: 5 },
+  { name: '욕심쟁이 햄스터', avatarIndex: 6 },
+  { name: '졸린 코알라', avatarIndex: 7 },
+  { name: '용맹한 사자', avatarIndex: 8 },
+  { name: '장난꾸러기 수달', avatarIndex: 9 },
+  { name: '느긋한 판다', avatarIndex: 10 },
+  { name: '꼼꼼한 펭귄', avatarIndex: 11 },
+  { name: '낙천적인 돼지', avatarIndex: 12 },
+  { name: '재빠른 토끼', avatarIndex: 13 },
+  { name: '부지런한 다람쥐', avatarIndex: 14 },
+  { name: '대담한 호랑이', avatarIndex: 15 },
+];
 const ROOM_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const TURN_TIMER_MS = 30000;
 const PREDICTION_TIMER_MS = 20000;
@@ -242,12 +259,19 @@ function createRoom(hostId, hostNickname, hostAvatarIndex, roomOptions) {
 
 function addBots(room) {
   const botCount = room.roomOptions.botCount || 0;
-  for (let i = 0; i < botCount; i++) {
-    const botId = 'bot_' + uuidv4();
+  const usedAvatars = new Set(room.players.map(p => p.avatarIndex));
+  const available = BOT_PROFILES.filter(b => !usedAvatars.has(b.avatarIndex));
+  // Fisher-Yates shuffle
+  for (let i = available.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [available[i], available[j]] = [available[j], available[i]];
+  }
+  for (let i = 0; i < botCount && i < available.length; i++) {
+    const profile = available[i];
     room.players.push({
-      id: botId,
-      nickname: BOT_NAMES[i] || ('봇' + (i + 1)),
-      avatarIndex: 6 + (i % 6),
+      id: 'bot_' + uuidv4(),
+      nickname: profile.name,
+      avatarIndex: profile.avatarIndex,
       ready: true,
       isHost: false,
       isBot: true,
