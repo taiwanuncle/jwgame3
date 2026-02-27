@@ -1,0 +1,107 @@
+.waiting-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-xl);
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+  padding: var(--gap-xl);
+  height: 100%;
+  overflow-y: auto;
+}
+
+.waiting-header {
+  text-align: center;
+}
+.waiting-header h2 {
+  font-size: 1.5rem;
+  margin-bottom: var(--gap-sm);
+}
+.room-code-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+}
+.room-code-badge strong {
+  color: var(--accent-light);
+}
+
+.players-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+}
+.player-card {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-md);
+  padding: var(--gap-md) var(--gap-lg);
+}
+.player-card.player-me {
+  border-color: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+.player-avatar {
+  font-size: 28px;
+}
+.player-info-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.player-name {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+}
+.host-badge {
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--gold);
+  color: #1a1a2e;
+  font-weight: 700;
+}
+.bot-badge {
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--text-muted);
+  color: var(--bg-primary);
+  font-weight: 700;
+}
+.ready-status {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.ready-status.ready {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.waiting-info {
+  font-size: 0.85rem;
+}
+
+.waiting-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-md);
+  align-items: center;
+}
+.host-options {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+}
+.host-options label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}

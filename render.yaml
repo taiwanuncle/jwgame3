@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: yeah-card-game
+    runtime: node
+    buildCommand: npm run build:render
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production

@@ -1,0 +1,117 @@
+.global-chat {
+  position: fixed;
+  bottom: var(--gap-md);
+  right: var(--gap-md);
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--gap-sm);
+}
+
+.chat-toggle-btn {
+  font-size: 20px;
+  padding: 6px 10px;
+  min-width: auto;
+  position: relative;
+}
+
+.chat-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--danger);
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+.chat-panel {
+  width: 300px;
+  max-height: 400px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--gap-sm) var(--gap-md);
+  border-bottom: 1px solid var(--glass-border);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.chat-close {
+  font-size: 0.9rem;
+  min-height: auto;
+  padding: 2px 6px;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--gap-sm) var(--gap-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-xs);
+  min-height: 200px;
+  max-height: 300px;
+}
+
+.chat-empty {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-align: center;
+  margin-top: var(--gap-xl);
+}
+
+.chat-msg {
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.chat-sender {
+  font-weight: 700;
+  color: var(--accent-light);
+  margin-right: var(--gap-xs);
+}
+
+.chat-text {
+  color: var(--text-secondary);
+}
+
+.chat-input-row {
+  display: flex;
+  gap: var(--gap-xs);
+  padding: var(--gap-sm);
+  border-top: 1px solid var(--glass-border);
+}
+
+.chat-input {
+  flex: 1;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  min-height: 36px;
+}
+
+.chat-send {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  min-height: 36px;
+}
+
+@media (max-width: 480px) {
+  .chat-panel {
+    width: calc(100vw - 2 * var(--gap-md));
+  }
+}

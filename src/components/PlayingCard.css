@@ -1,0 +1,167 @@
+/* === Card Sizes (aspect ratio ~0.74) === */
+.playing-card {
+  position: relative;
+  border-radius: 10px;
+  user-select: none;
+  flex-shrink: 0;
+  /* 3D flip container */
+  perspective: 600px;
+}
+
+.card-sm {
+  width: 52px;
+  height: 71px;
+  font-size: 10px;
+  border-radius: 7px;
+}
+.card-md {
+  width: 72px;
+  height: 97px;
+  font-size: 13px;
+}
+.card-lg {
+  width: 96px;
+  height: 130px;
+  font-size: 16px;
+}
+
+/* === 3D Flip Inner === */
+.card-flip-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-style: preserve-3d;
+  border-radius: inherit;
+}
+
+.playing-card.face-up .card-flip-inner {
+  transform: rotateY(180deg);
+}
+
+/* Both faces */
+.card-face-img,
+.card-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+/* Front face (rotated 180deg so it shows when flipped) */
+.card-face-img {
+  transform: rotateY(180deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* === Face Up === */
+.playing-card.face-up {
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.08),
+    0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.playing-card.red { color: #c41e3a; }
+.playing-card.black { color: #1a1a2e; }
+
+/* === Face Down === */
+.playing-card.face-down {
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.18);
+}
+
+/* === Card Image === */
+.card-image {
+  position: absolute;
+  inset: -1px;
+  width: calc(100% + 2px);
+  height: calc(100% + 2px);
+  object-fit: cover;
+  object-position: center;
+  border-radius: inherit;
+  display: block;
+}
+
+/* === Card Back (image) === */
+.card-back {
+  background: #1a3060;
+}
+
+.back-image {
+  position: absolute;
+  inset: -1px;
+  width: calc(100% + 2px);
+  height: calc(100% + 2px);
+  object-fit: cover;
+  object-position: center 55%;
+  border-radius: inherit;
+  display: block;
+}
+
+/* === States === */
+.playing-card.clickable {
+  cursor: pointer;
+}
+.playing-card.clickable:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+}
+.playing-card.clickable:active {
+  transform: translateY(-2px) scale(0.98);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.playing-card.highlighted {
+  outline: 3px solid var(--accent);
+  animation: pulse-highlight 1.2s ease infinite;
+}
+
+.playing-card.heart-highlight {
+  outline-color: var(--heart-red);
+  animation: pulse-heart-highlight 1.2s ease infinite;
+}
+
+.playing-card.dimmed {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.playing-card.winner {
+  outline: 3px solid var(--gold);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
+  animation: card-winner-glow 1s ease infinite alternate;
+}
+
+@keyframes pulse-highlight {
+  0%, 100% { outline-color: rgba(59, 130, 246, 0.4); }
+  50% { outline-color: rgba(59, 130, 246, 1); }
+}
+
+@keyframes pulse-heart-highlight {
+  0%, 100% { outline-color: rgba(239, 68, 68, 0.4); }
+  50% { outline-color: rgba(239, 68, 68, 1); }
+}
+
+@keyframes card-winner-glow {
+  from { box-shadow: 0 0 12px rgba(245, 158, 11, 0.3); }
+  to { box-shadow: 0 0 24px rgba(245, 158, 11, 0.6); }
+}
+
+/* === Responsive === */
+@media (max-width: 400px) {
+  .card-lg {
+    width: 80px;
+    height: 108px;
+    font-size: 14px;
+  }
+  .card-md {
+    width: 60px;
+    height: 81px;
+    font-size: 11px;
+  }
+}

@@ -1,0 +1,520 @@
+.game-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ===== HEADER ===== */
+.game-header {
+  display: flex;
+  align-items: center;
+  padding: var(--gap-sm) var(--gap-md);
+  position: relative;
+  z-index: 10;
+}
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  flex: 1;
+}
+.header-center {
+  flex: 0;
+}
+.header-right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+.round-info {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+.trump-badge {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+  animation: heart-pulse 2s ease infinite;
+}
+
+.log-panel {
+  position: absolute;
+  top: 48px;
+  left: var(--gap-md);
+  width: 300px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding: var(--gap-md);
+  z-index: 50;
+}
+.log-entry {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+/* ===== OVERLAY PANEL ===== */
+.overlay-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--gap-xl);
+  animation: fade-in 0.3s ease;
+}
+
+/* ===== DICE ===== */
+.dice-container {
+  padding: var(--gap-2xl);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+.dice-container h2 {
+  margin-bottom: var(--gap-lg);
+}
+.dice-spinner {
+  font-size: 64px;
+  animation: dice-spin 0.3s linear infinite;
+}
+@keyframes dice-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.dice-results {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--gap-md);
+  margin-bottom: var(--gap-lg);
+}
+.dice-player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-xs);
+  padding: var(--gap-md);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  min-width: 80px;
+}
+.dice-player.dice-winner {
+  background: rgba(59, 130, 246, 0.2);
+  border: 2px solid var(--accent);
+  box-shadow: var(--shadow-glow);
+}
+.dice-name {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+.dice-value {
+  font-size: 2rem;
+  font-weight: 800;
+}
+.dice-announce {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent-light);
+}
+
+/* ===== PREDICTION ===== */
+.prediction-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-xl);
+  padding: var(--gap-lg);
+  overflow-y: auto;
+}
+.my-hand-display {
+  text-align: center;
+}
+.my-hand-display label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--gap-sm);
+  font-weight: 600;
+}
+.hand-cards {
+  display: flex;
+  justify-content: center;
+  gap: var(--gap-sm);
+  flex-wrap: wrap;
+}
+
+.prediction-selector,
+.prediction-waiting {
+  padding: var(--gap-xl);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+}
+.prediction-selector h3,
+.prediction-waiting h3 {
+  margin-bottom: var(--gap-lg);
+}
+.pred-numbers {
+  display: flex;
+  justify-content: center;
+  gap: var(--gap-sm);
+  flex-wrap: wrap;
+  margin-bottom: var(--gap-lg);
+}
+.pred-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--glass-border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.pred-btn:hover {
+  border-color: var(--accent);
+  background: rgba(59, 130, 246, 0.1);
+}
+.pred-btn.pred-selected {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: white;
+  box-shadow: var(--shadow-glow);
+}
+
+.pred-reveals {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+  margin-bottom: var(--gap-lg);
+}
+.pred-reveal-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--gap-sm) var(--gap-md);
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+}
+.pred-reveal-num {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--accent-light);
+}
+
+.submitted-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--gap-xs);
+  margin-top: var(--gap-md);
+}
+.sub-badge {
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  background: var(--bg-card);
+  color: var(--text-muted);
+}
+.sub-badge.sub-done {
+  color: var(--success);
+  background: rgba(34, 197, 94, 0.15);
+}
+
+/* ===== TIMER BAR ===== */
+.timer-bar {
+  width: 100%;
+  height: 24px;
+  background: var(--bg-card);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  position: relative;
+  margin-top: var(--gap-sm);
+}
+.timer-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-light));
+  border-radius: var(--radius-full);
+  transition: width 1s linear;
+}
+.timer-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: white;
+}
+
+/* ===== TRICK VIEW ===== */
+.trick-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.opponents-row {
+  display: flex;
+  justify-content: center;
+  gap: var(--gap-sm);
+  padding: var(--gap-sm) var(--gap-md);
+  flex-wrap: wrap;
+}
+.opponent-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--gap-sm) var(--gap-md);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  border: 2px solid transparent;
+  min-width: 80px;
+  font-size: 0.8rem;
+  position: relative;
+}
+.opponent-card.opponent-active {
+  border-color: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+.opponent-card.opponent-dc {
+  opacity: 0.5;
+}
+.opp-avatar {
+  font-size: 20px;
+}
+.opp-name {
+  font-weight: 600;
+  font-size: 0.78rem;
+}
+.opp-stats {
+  display: flex;
+  gap: var(--gap-sm);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+.opp-pred {
+  color: var(--accent-light);
+}
+.opp-wins {
+  color: var(--gold-light);
+}
+.dc-badge {
+  font-size: 0.6rem;
+  color: var(--danger);
+}
+
+/* ===== TRICK TABLE ===== */
+.trick-table {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: var(--gap-sm) var(--gap-md);
+  padding: var(--gap-lg);
+  min-height: 140px;
+}
+.trick-info {
+  display: flex;
+  gap: var(--gap-lg);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--gap-md);
+}
+.lead-suit {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.trick-cards {
+  display: flex;
+  justify-content: center;
+  gap: var(--gap-md);
+  flex-wrap: wrap;
+}
+.trick-card-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--gap-xs);
+}
+.trick-card-name {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+.trick-card-empty .card-placeholder {
+  width: 52px;
+  height: 71px;
+  border-radius: 7px;
+  border: 2px dashed var(--glass-border);
+  background: transparent;
+}
+.trick-winner-announce {
+  margin-top: var(--gap-md);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--gold-light);
+  animation: slide-up 0.3s ease;
+}
+.trump-win {
+  color: var(--heart-red);
+}
+
+/* ===== TURN STATUS ===== */
+.turn-status {
+  text-align: center;
+  padding: var(--gap-sm) var(--gap-md);
+}
+.my-turn-label {
+  font-weight: 700;
+  color: var(--accent-light);
+  animation: glow-pulse 1.5s ease infinite;
+  display: inline-block;
+}
+.waiting-label {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* ===== MY HAND ===== */
+.my-hand-section {
+  padding: var(--gap-sm) var(--gap-md) var(--gap-lg);
+}
+.my-player-info {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  margin-bottom: var(--gap-sm);
+  justify-content: center;
+}
+.my-avatar {
+  font-size: 24px;
+}
+.my-name {
+  font-weight: 700;
+}
+.my-stats {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.hand-interactive {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+/* ===== ROUND SCORING ===== */
+.scoring-container {
+  padding: var(--gap-2xl);
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+}
+.scoring-container h2 {
+  margin-bottom: var(--gap-lg);
+}
+.score-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--gap-xl);
+  font-size: 0.85rem;
+}
+.score-table th {
+  padding: var(--gap-sm);
+  text-align: center;
+  color: var(--text-muted);
+  font-weight: 600;
+  border-bottom: 1px solid var(--glass-border);
+}
+.score-table td {
+  padding: var(--gap-sm);
+  text-align: center;
+}
+.score-correct {
+  color: var(--success);
+}
+.score-wrong {
+  color: var(--text-muted);
+}
+.score-total {
+  font-weight: 700;
+  color: var(--gold-light);
+}
+
+/* === Mobile Responsive === */
+@media (max-width: 480px) {
+  .game-header {
+    padding: var(--gap-xs) var(--gap-sm);
+  }
+  .opponents-row {
+    gap: 4px;
+    padding: var(--gap-xs) var(--gap-sm);
+  }
+  .opponent-card {
+    padding: var(--gap-xs) var(--gap-sm);
+    min-width: 60px;
+    font-size: 0.7rem;
+  }
+  .opp-avatar {
+    font-size: 16px;
+  }
+  .opp-name {
+    font-size: 0.68rem;
+  }
+  .opp-stats {
+    font-size: 0.6rem;
+  }
+  .trick-table {
+    padding: var(--gap-sm);
+    margin: var(--gap-xs) var(--gap-sm);
+    min-height: 100px;
+  }
+  .trick-info {
+    font-size: 0.75rem;
+    gap: var(--gap-sm);
+  }
+  .trick-cards {
+    gap: var(--gap-sm);
+  }
+  .trick-card-name {
+    font-size: 0.6rem;
+  }
+  .my-hand-section {
+    padding: var(--gap-xs) var(--gap-sm) var(--gap-md);
+  }
+  .hand-interactive {
+    gap: 2px;
+  }
+  .prediction-selector,
+  .prediction-waiting {
+    padding: var(--gap-lg);
+    max-width: 100%;
+  }
+  .pred-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+  .scoring-container {
+    padding: var(--gap-lg);
+  }
+  .score-table {
+    font-size: 0.75rem;
+  }
+}

@@ -1,0 +1,15 @@
+.music-toggle-btn {
+  font-size: 18px;
+  padding: 2px 6px;
+  min-width: auto;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.music-toggle-btn.playing {
+  animation: music-pulse 1.5s ease infinite;
+}
+
+@keyframes music-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}

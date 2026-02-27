@@ -1,0 +1,181 @@
+.lobby-page {
+  justify-content: center;
+  align-items: center;
+  gap: var(--gap-xl);
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+  padding: var(--gap-xl);
+  overflow-y: auto;
+}
+
+.lobby-title {
+  text-align: center;
+}
+.lobby-icon {
+  font-size: 64px;
+  display: block;
+  margin-bottom: var(--gap-md);
+  filter: drop-shadow(0 4px 16px var(--accent-glow));
+}
+.lobby-title h1 {
+  font-size: 2.2rem;
+  margin-bottom: var(--gap-xs);
+  background: linear-gradient(135deg, var(--accent-light), var(--accent), #818cf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+}
+.lobby-subtitle {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.lobby-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-md);
+  width: 100%;
+}
+.btn-large {
+  padding: 16px 32px;
+  font-size: 1.05rem;
+  border-radius: var(--radius-lg);
+}
+
+.back-btn {
+  align-self: flex-start;
+}
+
+.lobby-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-lg);
+  padding: var(--gap-xl);
+}
+.lobby-form h2 {
+  text-align: center;
+  font-size: 1.3rem;
+}
+
+.avatar-picker label,
+.form-field label,
+.option-group label,
+.room-list > label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--gap-xs);
+  font-weight: 600;
+}
+
+.avatar-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-sm);
+}
+.avatar-btn {
+  width: 44px;
+  height: 44px;
+  font-size: 24px;
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  border: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.avatar-btn.selected {
+  border-color: var(--accent);
+  background: rgba(59, 130, 246, 0.15);
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+.avatar-btn:hover:not(.selected) {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.create-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-lg);
+}
+.bot-options-inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-lg);
+  padding-top: var(--gap-sm);
+}
+.option-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-xs);
+}
+.bot-count-group .toggle-btn {
+  min-width: 32px;
+  padding: 8px 2px;
+  flex: 0 1 auto;
+}
+
+.join-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-lg);
+}
+.code-input-row {
+  display: flex;
+  gap: var(--gap-sm);
+}
+.code-input-row input {
+  flex: 1;
+  text-align: center;
+  letter-spacing: 4px;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.room-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-sm);
+}
+.room-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--gap-md);
+}
+.room-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-xs);
+}
+.room-host {
+  font-weight: 600;
+}
+.room-players {
+  font-size: 0.8rem;
+}
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  min-height: 36px;
+}
+
+.error-toast {
+  background: linear-gradient(135deg, #ef5350, #e53935);
+  color: white;
+  padding: var(--gap-sm) var(--gap-md);
+  border-radius: var(--radius-md);
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(239, 83, 80, 0.3);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}

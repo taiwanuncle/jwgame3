@@ -1,0 +1,139 @@
+.gameover-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: var(--gap-xl);
+  overflow-y: auto;
+}
+
+.gameover-content {
+  max-width: 520px;
+  width: 100%;
+  padding: var(--gap-2xl);
+  text-align: center;
+  animation: slide-up 0.5s var(--ease-out);
+}
+
+.gameover-title {
+  font-size: 2rem;
+  margin-bottom: var(--gap-xl);
+  background: linear-gradient(135deg, var(--gold-light), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.winner-section {
+  margin-bottom: var(--gap-xl);
+}
+.winner-icon {
+  font-size: 56px;
+  display: block;
+  margin-bottom: var(--gap-sm);
+}
+.winner-name {
+  font-size: 1.5rem;
+}
+.winner-score {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--gold-light);
+}
+.winner-you {
+  color: var(--accent-light);
+  font-weight: 600;
+  margin-top: var(--gap-xs);
+}
+
+.final-standings {
+  margin-bottom: var(--gap-xl);
+}
+.standings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.standings-table th {
+  padding: var(--gap-sm);
+  color: var(--text-muted);
+  font-weight: 600;
+  border-bottom: 1px solid var(--glass-border);
+}
+.standings-table td {
+  padding: var(--gap-sm) var(--gap-md);
+}
+.standings-me {
+  background: rgba(59, 130, 246, 0.1);
+}
+.rank-cell {
+  font-size: 1.2rem;
+}
+.score-cell {
+  font-weight: 800;
+  color: var(--gold-light);
+  font-size: 1.1rem;
+}
+.bot-tag {
+  font-size: 0.65rem;
+  padding: 1px 5px;
+  border-radius: var(--radius-sm);
+  background: var(--text-muted);
+  color: var(--bg-primary);
+  margin-left: 4px;
+  vertical-align: middle;
+}
+.me-tag {
+  font-size: 0.65rem;
+  padding: 1px 5px;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: white;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+.round-breakdown {
+  margin-bottom: var(--gap-xl);
+}
+.round-breakdown h3 {
+  font-size: 0.95rem;
+  margin-bottom: var(--gap-md);
+  color: var(--text-secondary);
+}
+.breakdown-scroll {
+  overflow-x: auto;
+}
+.breakdown-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+  min-width: 300px;
+}
+.breakdown-table th,
+.breakdown-table td {
+  padding: 4px 6px;
+  text-align: center;
+}
+.breakdown-table th {
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--glass-border);
+}
+.round-cards {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+.round-success {
+  color: var(--success);
+  font-weight: 600;
+}
+.round-fail {
+  color: var(--text-muted);
+}
+
+.gameover-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap-md);
+  align-items: center;
+}
