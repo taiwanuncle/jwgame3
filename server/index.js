@@ -401,47 +401,51 @@ function startDiceRoll(room) {
   room.phase = PHASES.DICE_ROLL;
   room.diceResults = [];
 
-  const rolls = room.players.map(p => ({
+  // Round 1: all players roll
+  let candidates = room.players.map(p => ({
     playerId: p.id,
     playerName: p.nickname,
+    avatarIndex: p.avatarIndex ?? 0,
     roll: Math.floor(Math.random() * 6) + 1,
   }));
 
-  let candidates = [...rolls];
-  let finalRolls = [...rolls];
+  const rounds = [{ rolls: candidates.map(c => ({ ...c })) }];
 
   while (true) {
     const maxRoll = Math.max(...candidates.map(c => c.roll));
     const winners = candidates.filter(c => c.roll === maxRoll);
+
     if (winners.length === 1) {
+      // Single winner found
       const winnerId = winners[0].playerId;
       room.firstRoundLeadIndex = room.players.findIndex(p => p.id === winnerId);
-      room.diceResults = finalRolls;
+      room.diceResults = rounds[0].rolls;
 
       addActionLog(room, '주사위 결과: ' + winners[0].playerName + '님이 선 플레이어!');
 
       emitToRoom(room, 'dice_result', {
-        rolls: finalRolls,
+        rounds,
         winnerId,
         winnerName: winners[0].playerName,
       });
       emitPersonalStates(room);
 
+      // Wait for client animations: ~4s per round + 2s for winner announce
+      const waitMs = rounds.length * 4000 + 2000;
       setTimeout(() => {
         if (room.phase === PHASES.DICE_ROLL) {
           startNextRound(room);
         }
-      }, 3000);
+      }, waitMs);
       return;
     }
 
+    // Tie — re-roll only tied players
     for (const w of winners) {
-      const newRoll = Math.floor(Math.random() * 6) + 1;
-      w.roll = newRoll;
-      const entry = finalRolls.find(r => r.playerId === w.playerId);
-      if (entry) entry.roll = newRoll;
+      w.roll = Math.floor(Math.random() * 6) + 1;
     }
     candidates = winners;
+    rounds.push({ rolls: candidates.map(c => ({ ...c })) });
   }
 }
 

@@ -73,13 +73,33 @@
 
 /* ===== DICE ===== */
 .dice-container {
-  padding: var(--gap-2xl);
+  padding: var(--gap-xl) var(--gap-lg);
   text-align: center;
-  max-width: 400px;
+  max-width: 520px;
   width: 100%;
 }
-.dice-container h2 {
+.dice-title {
+  font-size: 1.4rem;
   margin-bottom: var(--gap-lg);
+  animation: fade-in 0.3s ease;
+}
+.dice-title-tie {
+  color: var(--gold-light);
+  animation: dice-title-pulse 0.6s ease;
+}
+.dice-title-winner {
+  color: var(--accent-light);
+  font-size: 1.5rem;
+  animation: dice-title-pop 0.5s var(--ease-out);
+}
+@keyframes dice-title-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+@keyframes dice-title-pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
 }
 .dice-spinner {
   font-size: 64px;
@@ -100,29 +120,101 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--gap-xs);
+  gap: 6px;
   padding: var(--gap-md);
   border-radius: var(--radius-md);
   background: var(--bg-card);
-  min-width: 80px;
+  min-width: 90px;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+.dice-player-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 .dice-player.dice-winner {
   background: rgba(59, 130, 246, 0.2);
-  border: 2px solid var(--accent);
-  box-shadow: var(--shadow-glow);
+  border-color: var(--accent);
+  box-shadow: 0 0 20px var(--accent-glow), 0 0 40px rgba(59, 130, 246, 0.15);
+  animation: dice-winner-glow 1.5s ease infinite;
+}
+@keyframes dice-winner-glow {
+  0%, 100% { box-shadow: 0 0 20px var(--accent-glow); }
+  50% { box-shadow: 0 0 30px var(--accent-glow), 0 0 50px rgba(59, 130, 246, 0.2); }
+}
+.dice-player.dice-max {
+  border-color: var(--gold);
+  background: rgba(245, 158, 11, 0.1);
+}
+.dice-player.dice-eliminated {
+  opacity: 0.35;
+  transform: scale(0.9);
+}
+.dice-player.dice-active-rolling {
+  animation: dice-player-bounce 0.4s ease infinite;
+}
+@keyframes dice-player-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
 }
 .dice-name {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: var(--text-secondary);
+  font-weight: 600;
 }
-.dice-value {
-  font-size: 2rem;
-  font-weight: 800;
-}
-.dice-announce {
+.dice-value-num {
   font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--accent-light);
+  font-weight: 800;
+  color: var(--text-primary);
+  animation: dice-num-pop 0.3s var(--ease-out);
+}
+@keyframes dice-num-pop {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.dice-tie-msg {
+  font-size: 0.95rem;
+  color: var(--gold-light);
+  font-weight: 600;
+  animation: fade-in 0.3s ease;
+}
+
+/* ===== DICE FACE (CSS dots) ===== */
+.dice-face {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(145deg, #f5f5f5, #e0e0e0);
+  border-radius: 10px;
+  padding: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.6);
+}
+.dice-face-rolling {
+  animation: dice-face-shake 0.15s ease infinite;
+}
+@keyframes dice-face-shake {
+  0% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(5deg) scale(1.02); }
+  50% { transform: rotate(0deg) scale(0.98); }
+  75% { transform: rotate(-5deg) scale(1.02); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+.dice-dot-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dice-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #444, #1a1a1a);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
 }
 
 /* ===== PREDICTION ===== */
@@ -470,6 +562,26 @@
 
 /* === Mobile Responsive === */
 @media (max-width: 480px) {
+  .dice-container {
+    padding: var(--gap-lg) var(--gap-md);
+  }
+  .dice-player {
+    min-width: 72px;
+    padding: var(--gap-sm);
+  }
+  .dice-face {
+    width: 44px;
+    height: 44px;
+    padding: 5px;
+  }
+  .dice-dot {
+    width: 8px;
+    height: 8px;
+  }
+  .dice-player-avatar {
+    width: 26px;
+    height: 26px;
+  }
   .game-header {
     padding: var(--gap-xs) var(--gap-sm);
   }

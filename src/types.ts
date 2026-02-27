@@ -78,11 +78,16 @@ export interface PlayedCard {
 export interface DiceRollEntry {
   playerId: string;
   playerName: string;
+  avatarIndex: number;
   roll: number;
 }
 
-export interface DiceResult {
+export interface DiceRound {
   rolls: DiceRollEntry[];
+}
+
+export interface DiceResult {
+  rounds: DiceRound[];
   winnerId: string;
   winnerName: string;
 }

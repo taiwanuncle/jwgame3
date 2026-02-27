@@ -6,7 +6,7 @@ import PlayingCard from '../components/PlayingCard';
 import MusicToggle from '../components/MusicToggle';
 import InfoModal from '../components/InfoModal';
 import { getAvatarSrc } from '../utils/characters';
-import { playCardPlay, playMyTurn, playDiceRoll, playPredictionReveal, playTrickWon, playRoundEnd } from '../utils/sfx';
+import { playCardPlay, playMyTurn, playDiceRoll, playDiceReveal, playDiceTie, playDiceWinner, playPredictionReveal, playTrickWon, playRoundEnd } from '../utils/sfx';
 import './GamePage.css';
 
 const SUIT_SYMBOLS: Record<string, string> = {
@@ -75,22 +75,122 @@ function GameHeader({ gs, sock }: { gs: NonNullable<Sock['gameState']>; sock: So
   );
 }
 
-// ===================== DICE =====================
+// ===================== DICE FACE (CSS dots) =====================
+const DICE_DOTS: Record<number, number[]> = {
+  1: [5],
+  2: [3, 7],
+  3: [3, 5, 7],
+  4: [1, 3, 7, 9],
+  5: [1, 3, 5, 7, 9],
+  6: [1, 3, 4, 6, 7, 9],
+};
+
+function DiceFace({ value, rolling }: { value: number; rolling?: boolean }) {
+  const dots = DICE_DOTS[value] || [];
+  return (
+    <div className={`dice-face ${rolling ? 'dice-face-rolling' : ''}`}>
+      {[1,2,3,4,5,6,7,8,9].map(pos => (
+        <div key={pos} className={`dice-dot-cell ${dots.includes(pos) ? 'dice-dot-active' : ''}`}>
+          {dots.includes(pos) && <div className="dice-dot" />}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ===================== DICE OVERLAY =====================
+type DicePhase = 'waiting' | 'rolling' | 'reveal' | 'tie' | 'winner';
+
 function DiceOverlay({ sock }: { sock: Sock }) {
   const dr = sock.diceResult;
-  const playedRef = useRef(false);
+  const [roundIdx, setRoundIdx] = useState(0);
+  const [phase, setPhase] = useState<DicePhase>('waiting');
+  const [rollingFaces, setRollingFaces] = useState<Record<string, number>>({});
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startedRef = useRef(false);
 
+  // Cleanup on unmount
   useEffect(() => {
-    if (!playedRef.current) {
-      playedRef.current = true;
-      playDiceRoll();
-    }
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, []);
 
+  // Start animation sequence when dice_result arrives
+  useEffect(() => {
+    if (!dr || startedRef.current) return;
+    startedRef.current = true;
+    setRoundIdx(0);
+    setPhase('rolling');
+    playDiceRoll();
+    startRollingAnimation(dr.rounds[0].rolls.map(r => r.playerId));
+  }, [dr]);
+
+  function startRollingAnimation(playerIds: string[]) {
+    // Rapidly cycle random faces for rolling players
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    const iv = setInterval(() => {
+      const faces: Record<string, number> = {};
+      for (const pid of playerIds) {
+        faces[pid] = Math.floor(Math.random() * 6) + 1;
+      }
+      setRollingFaces(prev => ({ ...prev, ...faces }));
+    }, 100);
+    intervalRef.current = iv;
+
+    // After 2 seconds, reveal results
+    timerRef.current = setTimeout(() => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      intervalRef.current = null;
+      setPhase('reveal');
+      playDiceReveal();
+
+      // After 1.8 seconds, check for tie or winner
+      timerRef.current = setTimeout(() => {
+        advanceRound();
+      }, 1800);
+    }, 2000);
+  }
+
+  function advanceRound() {
+    if (!dr) return;
+    if (roundIdx + 1 < dr.rounds.length) {
+      // There's a tie — show tie message, then start next round
+      setPhase('tie');
+      playDiceTie();
+      timerRef.current = setTimeout(() => {
+        const nextIdx = roundIdx + 1;
+        setRoundIdx(nextIdx);
+        setPhase('rolling');
+        playDiceRoll();
+        startRollingAnimation(dr.rounds[nextIdx].rolls.map(r => r.playerId));
+      }, 1200);
+    } else {
+      // Final winner!
+      setPhase('winner');
+      playDiceWinner();
+    }
+  }
+
+  // Get all players from round 0 (all players)
+  const allPlayers = dr?.rounds[0]?.rolls || [];
+  const currentRound = dr?.rounds[roundIdx];
+
+  // Determine which players are still in the game at current round
+  const activePlayerIds = currentRound?.rolls.map(r => r.playerId) || [];
+
+  // For reveal phase, find the max roll to highlight
+  const maxRollInRound = currentRound
+    ? Math.max(...currentRound.rolls.map(r => r.roll))
+    : 0;
+
+  // Waiting for server
   if (!dr) return (
     <div className="overlay-panel">
       <div className="dice-container glass">
-        <h2>주사위 굴리는 중...</h2>
+        <h2>주사위를 굴립니다!</h2>
         <div className="dice-spinner">🎲</div>
       </div>
     </div>
@@ -99,16 +199,73 @@ function DiceOverlay({ sock }: { sock: Sock }) {
   return (
     <div className="overlay-panel">
       <div className="dice-container glass">
-        <h2>주사위 결과</h2>
+        {phase === 'rolling' && (
+          <h2 className="dice-title">
+            {roundIdx === 0 ? '주사위를 굴립니다!' : '다시 굴립니다!'}
+          </h2>
+        )}
+        {phase === 'reveal' && <h2 className="dice-title">결과 확인!</h2>}
+        {phase === 'tie' && <h2 className="dice-title dice-title-tie">동률! 🎲</h2>}
+        {phase === 'winner' && (
+          <h2 className="dice-title dice-title-winner">
+            🎯 {dr.winnerName}님이 선!
+          </h2>
+        )}
+
         <div className="dice-results">
-          {dr.rolls.map((r) => (
-            <div key={r.playerId} className={`dice-player ${r.playerId === dr.winnerId ? 'dice-winner' : ''}`}>
-              <span className="dice-name">{r.playerName}</span>
-              <span className="dice-value">{r.roll}</span>
-            </div>
-          ))}
+          {allPlayers.map((player) => {
+            const isActive = activePlayerIds.includes(player.playerId);
+            const isWinner = phase === 'winner' && player.playerId === dr.winnerId;
+            const roundRoll = currentRound?.rolls.find(r => r.playerId === player.playerId);
+            const isMaxInRound = roundRoll && roundRoll.roll === maxRollInRound && (phase === 'reveal' || phase === 'tie');
+            const isEliminated = !isActive && roundIdx > 0;
+
+            // Determine dice value to display
+            let displayValue = 1;
+            if (phase === 'rolling' && isActive) {
+              displayValue = rollingFaces[player.playerId] || 1;
+            } else if ((phase === 'reveal' || phase === 'tie' || phase === 'winner') && roundRoll) {
+              displayValue = roundRoll.roll;
+            } else if (isEliminated) {
+              // Show their last known roll from the round they were eliminated
+              for (let i = Math.min(roundIdx - 1, dr.rounds.length - 1); i >= 0; i--) {
+                const prevRoll = dr.rounds[i].rolls.find(r => r.playerId === player.playerId);
+                if (prevRoll) { displayValue = prevRoll.roll; break; }
+              }
+            }
+
+            return (
+              <div
+                key={player.playerId}
+                className={[
+                  'dice-player',
+                  isWinner ? 'dice-winner' : '',
+                  isMaxInRound && !isWinner ? 'dice-max' : '',
+                  isEliminated ? 'dice-eliminated' : '',
+                  phase === 'rolling' && isActive ? 'dice-active-rolling' : '',
+                ].filter(Boolean).join(' ')}
+              >
+                <img
+                  className="dice-player-avatar"
+                  src={getAvatarSrc(player.avatarIndex)}
+                  alt=""
+                />
+                <span className="dice-name">{player.playerName}</span>
+                <DiceFace
+                  value={displayValue}
+                  rolling={phase === 'rolling' && isActive}
+                />
+                {(phase !== 'rolling' || !isActive) && (
+                  <span className="dice-value-num">{displayValue}</span>
+                )}
+              </div>
+            );
+          })}
         </div>
-        <p className="dice-announce">{dr.winnerName}님이 선 플레이어!</p>
+
+        {phase === 'tie' && (
+          <p className="dice-tie-msg">동률자끼리 다시 굴립니다!</p>
+        )}
       </div>
     </div>
   );

@@ -114,6 +114,31 @@ export function playDiceRoll() {
   playNoise(0.08, 0.06, 0.4);
 }
 
+/** Dice reveal — dramatic unveil */
+export function playDiceReveal() {
+  playTone(600, 0.08, 'triangle', 0.1);
+  playTone(800, 0.08, 'triangle', 0.1, 0.06);
+  playTone(1100, 0.2, 'sine', 0.12, 0.12);
+  playNoise(0.04, 0.06, 0.1);
+}
+
+/** Dice tie — suspenseful tension */
+export function playDiceTie() {
+  playTone(440, 0.15, 'sawtooth', 0.06);
+  playTone(466, 0.15, 'sawtooth', 0.06, 0.12);
+  playTone(440, 0.2, 'sawtooth', 0.04, 0.24);
+  playNoise(0.06, 0.05, 0.3);
+}
+
+/** Dice winner — victory fanfare */
+export function playDiceWinner() {
+  playTone(784, 0.12, 'sine', 0.12);           // G5
+  playTone(988, 0.12, 'sine', 0.12, 0.1);      // B5
+  playTone(1175, 0.15, 'sine', 0.12, 0.2);     // D6
+  playTone(1319, 0.35, 'sine', 0.1, 0.3);      // E6
+  playTone(1047, 0.35, 'triangle', 0.06, 0.3); // C6 harmony
+}
+
 /** Prediction reveal — mysterious reveal */
 export function playPredictionReveal() {
   playTone(440, 0.12, 'triangle', 0.1);         // A4
