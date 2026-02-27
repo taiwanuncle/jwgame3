@@ -3,6 +3,7 @@ import type { useSocket } from '../hooks/useSocket';
 import type { ToastItem } from '../components/Toast';
 import type { BotDifficulty } from '../types';
 import { CHARACTERS } from '../utils/characters';
+import { generateRandomName } from '../utils/randomName';
 import { playClick } from '../utils/sfx';
 import './LobbyPage.css';
 
@@ -83,18 +84,30 @@ export default function LobbyPage({ sock, addToast }: Props) {
     );
   }
 
+  function handleRandom() {
+    playClick();
+    const { avatarIndex, nickname: rndName } = generateRandomName();
+    saveNickname(rndName);
+    setAvatarIdx(avatarIndex);
+  }
+
   // --- Shared: Nickname + Avatar ---
   const nicknameAvatar = (
     <>
       <div className="form-field">
         <label>닉네임</label>
-        <input
-          className="input"
-          value={nickname}
-          onChange={(e) => saveNickname(e.target.value)}
-          placeholder="닉네임 입력"
-          maxLength={12}
-        />
+        <div className="nickname-row">
+          <input
+            className="input"
+            value={nickname}
+            onChange={(e) => saveNickname(e.target.value)}
+            placeholder="닉네임 입력"
+            maxLength={12}
+          />
+          <button className="btn btn-outline random-btn" onClick={handleRandom} title="랜덤 생성">
+            🎲
+          </button>
+        </div>
       </div>
       <div className="avatar-picker">
         <label>캐릭터</label>

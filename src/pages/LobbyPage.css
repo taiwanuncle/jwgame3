@@ -71,6 +71,22 @@
   font-weight: 600;
 }
 
+.nickname-row {
+  display: flex;
+  gap: var(--gap-sm);
+}
+.nickname-row .input {
+  flex: 1;
+}
+.random-btn {
+  font-size: 1.2rem;
+  padding: 8px 14px;
+  min-width: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .avatar-grid {
   display: flex;
   flex-wrap: wrap;
