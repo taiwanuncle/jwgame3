@@ -77,8 +77,8 @@ export default function LobbyPage({ sock, addToast }: Props) {
       <div className="lobby-page" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <div className="lobby-title">
           <img className="lobby-logo" src="/logo/opening.png" alt="예(Yeah!!)" draggable={false} />
-          <h1>예(Yeah!!)</h1>
-          <p className="lobby-subtitle">트릭테이킹 카드 게임</p>
+          <h1>예는 Yeah!!</h1>
+          <p className="lobby-subtitle">트릭테이킹 카드 게임 (说到做到)</p>
         </div>
         <div className="lobby-buttons">
           <button className="btn btn-primary btn-large" onClick={() => { playClick(); setView('create'); }}>
