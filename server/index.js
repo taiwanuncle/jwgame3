@@ -710,7 +710,8 @@ function resolveTrick(room) {
     if (room.currentTrickNumber >= room.totalTricksThisRound) {
       scoreRound(room);
     } else {
-      room.trickLeadPlayerId = winnerId;
+      // 선 플레이어가 라운드 끝까지 계속 리드
+      room.trickLeadPlayerId = room.players[room.currentRoundLeadIndex].id;
       startNextTrick(room);
     }
   }, 2000);
