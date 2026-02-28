@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { useSocket } from '../hooks/useSocket';
 import type { ToastItem } from '../components/Toast';
 import { getAvatarSrc } from '../utils/characters';
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function WaitingRoom({ sock, addToast }: Props) {
+  const { t } = useTranslation();
   const gs = sock.gameState;
   if (!gs) return null;
 
@@ -22,7 +24,7 @@ export default function WaitingRoom({ sock, addToast }: Props) {
   function handleStart() {
     playClick();
     if (playerCount < 3) {
-      addToast('최소 3명(봇 포함)이 필요합니다.', 'alert');
+      addToast(t('waiting.minPlayers'), 'alert');
       return;
     }
     sock.startGame();
@@ -31,9 +33,9 @@ export default function WaitingRoom({ sock, addToast }: Props) {
   return (
     <div className="waiting-page">
       <div className="waiting-header">
-        <h2>대기실</h2>
+        <h2>{t('waiting.title')}</h2>
         <div className="room-code-badge glass">
-          방 코드: <strong>{gs.roomCode}</strong>
+          {t('waiting.roomCode')} <strong>{gs.roomCode}</strong>
         </div>
       </div>
 
@@ -43,28 +45,28 @@ export default function WaitingRoom({ sock, addToast }: Props) {
             <img className="chr-avatar player-chr" src={getAvatarSrc(p.avatarIndex)} alt="" />
             <div className="player-info-text">
               <span className="player-name">
-                <span className="player-nick">{p.nickname}</span>
-                {p.isHost && <span className="host-badge">방장</span>}
-                {p.isBot && <span className="bot-badge">BOT</span>}
-                {p.id === gs.myId && <span className="me-badge">나</span>}
+                <span className="player-nick">{p.botNameKey ? t(p.botNameKey) : p.nickname}</span>
+                {p.isHost && <span className="host-badge">{t('waiting.host')}</span>}
+                {p.isBot && <span className="bot-badge">{t('waiting.botBadge')}</span>}
+                {p.id === gs.myId && <span className="me-badge">{t('common.me')}</span>}
               </span>
             </div>
             <span className={`ready-status ${p.ready || p.isHost ? 'ready' : ''}`}>
-              {p.isBot ? '✓' : p.isHost ? '✓' : p.ready ? '준비완료' : '대기중'}
+              {p.isBot ? '✓' : p.isHost ? '✓' : p.ready ? t('waiting.readyDone') : t('waiting.readyWaiting')}
             </span>
           </div>
         ))}
       </div>
 
       <div className="waiting-info text-muted">
-        {playerCount}/7명 ({humanCount}명 + 봇 {playerCount - humanCount}명)
+        {t('waiting.playerInfo', { count: playerCount, humans: humanCount, bots: playerCount - humanCount })}
       </div>
 
       <div className="waiting-actions">
         {isHost ? (
           <>
             <div className="host-options">
-              <label>봇 추가</label>
+              <label>{t('waiting.addBots')}</label>
               <div className="toggle-group bot-count-group">
                 {[0, 1, 2, 3, 4, 5, 6].filter((n) => humanCount + n >= 3 && humanCount + n <= 7).map((n) => (
                   <button
@@ -76,7 +78,7 @@ export default function WaitingRoom({ sock, addToast }: Props) {
               </div>
             </div>
             <button className="btn btn-primary btn-large" onClick={handleStart}>
-              게임 시작
+              {t('waiting.startGame')}
             </button>
           </>
         ) : (
@@ -84,11 +86,11 @@ export default function WaitingRoom({ sock, addToast }: Props) {
             className={`btn ${me?.ready ? 'btn-outline' : 'btn-primary'} btn-large`}
             onClick={() => { sock.toggleReady(); playClick(); }}
           >
-            {me?.ready ? '준비 취소' : '준비 완료'}
+            {me?.ready ? t('waiting.cancelReady') : t('waiting.ready')}
           </button>
         )}
         <button className="btn btn-ghost" onClick={() => { sock.leaveRoom(); playClick(); }}>
-          나가기
+          {t('common.leave')}
         </button>
       </div>
     </div>

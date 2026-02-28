@@ -48,22 +48,22 @@ const RANK_VALUES = {
 const TRUMP_SUIT = 'hearts';
 
 const BOT_PROFILES = [
-  { name: '신중한 곰', avatarIndex: 0 },
-  { name: '도도한 고양이', avatarIndex: 1 },
-  { name: '순진한 병아리', avatarIndex: 2 },
-  { name: '충직한 강아지', avatarIndex: 3 },
-  { name: '교활한 여우', avatarIndex: 4 },
-  { name: '여유로운 개구리', avatarIndex: 5 },
-  { name: '욕심쟁이 햄스터', avatarIndex: 6 },
-  { name: '졸린 코알라', avatarIndex: 7 },
-  { name: '용맹한 사자', avatarIndex: 8 },
-  { name: '장난꾸러기 수달', avatarIndex: 9 },
-  { name: '느긋한 판다', avatarIndex: 10 },
-  { name: '꼼꼼한 펭귄', avatarIndex: 11 },
-  { name: '낙천적인 돼지', avatarIndex: 12 },
-  { name: '재빠른 토끼', avatarIndex: 13 },
-  { name: '부지런한 다람쥐', avatarIndex: 14 },
-  { name: '대담한 호랑이', avatarIndex: 15 },
+  { name: '신중한 곰', nameKey: 'bot.cautiousBear', avatarIndex: 0 },
+  { name: '도도한 고양이', nameKey: 'bot.proudCat', avatarIndex: 1 },
+  { name: '순진한 병아리', nameKey: 'bot.naiveChick', avatarIndex: 2 },
+  { name: '충직한 강아지', nameKey: 'bot.loyalDog', avatarIndex: 3 },
+  { name: '교활한 여우', nameKey: 'bot.slyFox', avatarIndex: 4 },
+  { name: '여유로운 개구리', nameKey: 'bot.relaxedFrog', avatarIndex: 5 },
+  { name: '욕심쟁이 햄스터', nameKey: 'bot.greedyHamster', avatarIndex: 6 },
+  { name: '졸린 코알라', nameKey: 'bot.sleepyKoala', avatarIndex: 7 },
+  { name: '용맹한 사자', nameKey: 'bot.braveLion', avatarIndex: 8 },
+  { name: '장난꾸러기 수달', nameKey: 'bot.playfulOtter', avatarIndex: 9 },
+  { name: '느긋한 판다', nameKey: 'bot.lazyPanda', avatarIndex: 10 },
+  { name: '꼼꼼한 펭귄', nameKey: 'bot.carefulPenguin', avatarIndex: 11 },
+  { name: '낙천적인 돼지', nameKey: 'bot.optimisticPig', avatarIndex: 12 },
+  { name: '재빠른 토끼', nameKey: 'bot.quickRabbit', avatarIndex: 13 },
+  { name: '부지런한 다람쥐', nameKey: 'bot.diligentSquirrel', avatarIndex: 14 },
+  { name: '대담한 호랑이', nameKey: 'bot.boldTiger', avatarIndex: 15 },
 ];
 const ROOM_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const TURN_TIMER_MS = 30000;
@@ -165,8 +165,13 @@ function clearRoomTimer(room) {
   room.timerEnd = null;
 }
 
-function addActionLog(room, message) {
-  room.actionLog.push({ message, timestamp: Date.now() });
+function addActionLog(room, message, messageKey, params) {
+  const entry = { message, timestamp: Date.now() };
+  if (messageKey) {
+    entry.messageKey = messageKey;
+    if (params) entry.params = params;
+  }
+  room.actionLog.push(entry);
   if (room.actionLog.length > 50) {
     room.actionLog = room.actionLog.slice(-50);
   }
@@ -271,6 +276,7 @@ function addBots(room) {
     room.players.push({
       id: 'bot_' + uuidv4(),
       nickname: profile.name,
+      botNameKey: profile.nameKey,
       avatarIndex: profile.avatarIndex,
       ready: true,
       isHost: false,
@@ -313,6 +319,7 @@ function buildPersonalState(room, playerId) {
       ready: p.ready,
       isHost: p.isHost,
       isBot: p.isBot,
+      botNameKey: p.botNameKey || undefined,
       connected: p.connected,
       prediction: p.predictionSubmitted ? p.prediction : null,
       predictionSubmitted: p.predictionSubmitted,
@@ -394,7 +401,7 @@ function startGame(room) {
     p.totalScore = 0;
   }
 
-  addActionLog(room, '게임이 시작되었습니다!');
+  addActionLog(room, '게임이 시작되었습니다!', 'server.gameStarted');
   startDiceRoll(room);
 }
 
@@ -424,7 +431,7 @@ function startDiceRoll(room) {
       room.firstRoundLeadIndex = room.players.findIndex(p => p.id === winnerId);
       room.diceResults = rounds[0].rolls;
 
-      addActionLog(room, '주사위 결과: ' + winners[0].playerName + '님이 선 플레이어!');
+      addActionLog(room, '주사위 결과: ' + winners[0].playerName + '님이 선 플레이어!', 'server.diceResult', { name: winners[0].playerName });
 
       emitToRoom(room, 'dice_result', {
         rounds,
@@ -492,7 +499,8 @@ function startNextRound(room) {
 
   addActionLog(room,
     '라운드 ' + room.currentRound + '/' + room.totalRounds +
-    ' 시작! (' + room.cardsThisRound + '장씩 배분)'
+    ' 시작! (' + room.cardsThisRound + '장씩 배분)',
+    'server.roundStart', { current: room.currentRound, total: room.totalRounds, cards: room.cardsThisRound }
   );
 
   startPredictionPhase(room);
@@ -527,7 +535,7 @@ function startPredictionPhase(room) {
       if (!p.predictionSubmitted) {
         p.prediction = 0;
         p.predictionSubmitted = true;
-        addActionLog(room, p.nickname + '님의 예측: 시간 초과 (0으로 자동 제출)');
+        addActionLog(room, p.nickname + '님의 예측: 시간 초과 (0으로 자동 제출)', 'server.predTimeout', { name: p.nickname });
       }
     }
     revealPredictions(room);
@@ -545,7 +553,7 @@ function submitPlayerPrediction(room, playerId, prediction) {
   player.prediction = pred;
   player.predictionSubmitted = true;
 
-  addActionLog(room, player.nickname + '님이 예측을 제출했습니다.');
+  addActionLog(room, player.nickname + '님이 예측을 제출했습니다.', 'server.predSubmitted', { name: player.nickname });
   emitPersonalStates(room);
 
   const allSubmitted = room.players.every(p => p.predictionSubmitted);
@@ -565,7 +573,8 @@ function revealPredictions(room) {
   emitToRoom(room, 'predictions_revealed', { predictions });
   addActionLog(room,
     '예측 공개: ' +
-    predictions.map(p => p.playerName + '(' + p.prediction + ')').join(', ')
+    predictions.map(p => p.playerName + '(' + p.prediction + ')').join(', '),
+    'server.predsRevealed', { details: predictions.map(p => p.playerName + '(' + p.prediction + ')').join(', ') }
   );
 
   setTimeout(() => {
@@ -590,7 +599,8 @@ function startNextTrick(room) {
   room.currentTurnPlayerId = room.trickLeadPlayerId;
 
   addActionLog(room,
-    '트릭 ' + room.currentTrickNumber + '/' + room.totalTricksThisRound + ' 시작'
+    '트릭 ' + room.currentTrickNumber + '/' + room.totalTricksThisRound + ' 시작',
+    'server.trickStart', { current: room.currentTrickNumber, total: room.totalTricksThisRound }
   );
 
   emitPersonalStates(room);
@@ -625,7 +635,7 @@ function startTurnTimer(room) {
     if (room.phase === PHASES.TRICK_PLAY && room.currentTurnPlayerId === playerRef.id) {
       const validCards = getValidCards(playerRef.hand, room.trickLeadSuit);
       if (validCards.length > 0) {
-        addActionLog(room, playerRef.nickname + '님 시간 초과! 자동 카드 제출.');
+        addActionLog(room, playerRef.nickname + '님 시간 초과! 자동 카드 제출.', 'server.turnTimeout', { name: playerRef.nickname });
         playCard(room, playerRef.id, validCards[0].id);
       }
     }
@@ -649,7 +659,7 @@ function playCard(room, playerId, cardId) {
     const hasLeadSuit = player.hand.some(c => c.suit === room.trickLeadSuit);
     if (hasLeadSuit && card.suit !== room.trickLeadSuit) {
       const sock = getSocketForPlayer(room, playerId);
-      if (sock) sock.emit('error_msg', { message: '리드 수트를 따라야 합니다!' });
+      if (sock) sock.emit('error_msg', { message: '리드 수트를 따라야 합니다!', messageKey: 'server.mustFollowLead' });
       return;
     }
   }
@@ -666,7 +676,7 @@ function playCard(room, playerId, cardId) {
     card,
   });
 
-  addActionLog(room, player.nickname + '님이 ' + cardToString(card) + '를 냈습니다.');
+  addActionLog(room, player.nickname + '님이 ' + cardToString(card) + '를 냈습니다.', 'server.cardPlayed', { name: player.nickname, card: cardToString(card) });
   clearRoomTimer(room);
 
   if (room.trickCards.length === room.players.length) {
@@ -694,7 +704,8 @@ function resolveTrick(room) {
 
   addActionLog(room,
     winnerName + '님이 트릭 ' + room.currentTrickNumber +
-    '을 이겼습니다!' + (wonByTrump ? ' (트럼프!)' : '')
+    '을 이겼습니다!' + (wonByTrump ? ' (트럼프!)' : ''),
+    'server.trickWon', { name: winnerName, trick: room.currentTrickNumber, trump: wonByTrump ? ' (트럼프!)' : '' }
   );
 
   const trickResult = {
@@ -749,7 +760,8 @@ function scoreRound(room) {
     '라운드 ' + room.currentRound + ' 결과: ' +
     playerScores.map(ps =>
       ps.playerName + '(' + (ps.correct ? '성공' : '실패') + ': +' + ps.roundScore + ')'
-    ).join(', ')
+    ).join(', '),
+    'server.roundResult', { round: room.currentRound, details: playerScores.map(ps => ps.playerName + '(' + (ps.correct ? '✓' : '✗') + ': +' + ps.roundScore + ')').join(', ') }
   );
 
   const roundResult = {
@@ -787,7 +799,8 @@ function endGame(room) {
   const winners = room.players.filter(p => p.totalScore === maxScore).map(p => p.nickname);
 
   addActionLog(room,
-    '게임 종료! 우승: ' + winners.join(', ') + ' (' + maxScore + '점)'
+    '게임 종료! 우승: ' + winners.join(', ') + ' (' + maxScore + '점)',
+    'server.gameOver', { winners: winners.join(', '), score: maxScore }
   );
 
   emitPersonalStates(room);
@@ -995,15 +1008,15 @@ io.on('connection', (socket) => {
     const room = rooms.get(roomCode);
 
     if (!room) {
-      socket.emit('error_msg', { message: '방을 찾을 수 없습니다.' });
+      socket.emit('error_msg', { message: '방을 찾을 수 없습니다.', messageKey: 'server.roomNotFound' });
       return;
     }
     if (room.phase !== PHASES.WAITING) {
-      socket.emit('error_msg', { message: '이미 게임이 진행 중입니다.' });
+      socket.emit('error_msg', { message: '이미 게임이 진행 중입니다.', messageKey: 'server.gameInProgress' });
       return;
     }
     if (room.players.length >= 7) {
-      socket.emit('error_msg', { message: '방이 가득 찼습니다.' });
+      socket.emit('error_msg', { message: '방이 가득 찼습니다.', messageKey: 'server.roomFull' });
       return;
     }
 
@@ -1038,7 +1051,7 @@ io.on('connection', (socket) => {
     currentRoomCode = roomCode;
     socket.join(roomCode);
 
-    addActionLog(room, nickname + '님이 방에 참가했습니다.');
+    addActionLog(room, nickname + '님이 방에 참가했습니다.', 'server.playerJoined', { name: nickname });
     socket.emit('room_joined', { roomCode, persistentId: playerId });
     emitPersonalStates(room);
     emitRoomsUpdate();
@@ -1049,12 +1062,12 @@ io.on('connection', (socket) => {
     const room = rooms.get(roomCode);
 
     if (!room) {
-      socket.emit('error_msg', { message: '방을 찾을 수 없습니다.' });
+      socket.emit('error_msg', { message: '방을 찾을 수 없습니다.', messageKey: 'server.roomNotFound' });
       return;
     }
     const player = room.players.find(p => p.id === persistentId);
     if (!player) {
-      socket.emit('error_msg', { message: '방에서 플레이어를 찾을 수 없습니다.' });
+      socket.emit('error_msg', { message: '방에서 플레이어를 찾을 수 없습니다.', messageKey: 'server.playerNotFound' });
       return;
     }
 
@@ -1064,7 +1077,7 @@ io.on('connection', (socket) => {
     currentRoomCode = roomCode;
     socket.join(roomCode);
 
-    addActionLog(room, player.nickname + '님이 재접속했습니다.');
+    addActionLog(room, player.nickname + '님이 재접속했습니다.', 'server.playerReconnected', { name: player.nickname });
     socket.emit('rejoin_success', { roomCode, persistentId });
     emitPersonalStates(room);
 
@@ -1120,14 +1133,14 @@ io.on('connection', (socket) => {
 
     const totalPlayers = room.players.length;
     if (totalPlayers < 3 || totalPlayers > 7) {
-      socket.emit('error_msg', { message: '3~7명의 플레이어가 필요합니다.' });
+      socket.emit('error_msg', { message: '3~7명의 플레이어가 필요합니다.', messageKey: 'server.needPlayers' });
       return;
     }
 
     const humanNonHost = room.players.filter(p => !p.isBot && !p.isHost);
     const allReady = humanNonHost.every(p => p.ready);
     if (!allReady && humanNonHost.length > 0) {
-      socket.emit('error_msg', { message: '모든 플레이어가 준비되지 않았습니다.' });
+      socket.emit('error_msg', { message: '모든 플레이어가 준비되지 않았습니다.', messageKey: 'server.notAllReady' });
       return;
     }
 
@@ -1202,7 +1215,7 @@ io.on('connection', (socket) => {
       p.ready = p.isHost || p.isBot;
     }
 
-    addActionLog(room, "게임이 초기화되었습니다. 다시 시작할 수 있습니다.");
+    addActionLog(room, "게임이 초기화되었습니다. 다시 시작할 수 있습니다.", 'server.gameReset');
     emitPersonalStates(room);
     emitRoomsUpdate();
   });
@@ -1236,7 +1249,7 @@ io.on('connection', (socket) => {
     player.connected = false;
     delete room.socketMap[currentPlayerId];
 
-    addActionLog(room, player.nickname + "님의 연결이 끊겼습니다.");
+    addActionLog(room, player.nickname + "님의 연결이 끊겼습니다.", 'server.playerDisconnected', { name: player.nickname });
     emitPersonalStates(room);
 
     if (room.phase === PHASES.TRICK_PLAY && room.currentTurnPlayerId === currentPlayerId) {
@@ -1288,7 +1301,7 @@ function handleLeaveRoom(socket, playerId, roomCode) {
   delete room.socketMap[playerId];
   socket.leave(roomCode);
 
-  addActionLog(room, player.nickname + "님이 방을 나갔습니다.");
+  addActionLog(room, player.nickname + "님이 방을 나갔습니다.", 'server.playerLeft', { name: player.nickname });
 
   const humanPlayers = room.players.filter(p => !p.isBot);
   if (humanPlayers.length === 0) {
@@ -1300,7 +1313,7 @@ function handleLeaveRoom(socket, playerId, roomCode) {
 
   if (wasHost && humanPlayers.length > 0) {
     humanPlayers[0].isHost = true;
-    addActionLog(room, humanPlayers[0].nickname + "님이 새로운 방장이 되었습니다.");
+    addActionLog(room, humanPlayers[0].nickname + "님이 새로운 방장이 되었습니다.", 'server.newHost', { name: humanPlayers[0].nickname });
   }
 
   emitPersonalStates(room);

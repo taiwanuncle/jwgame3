@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSocket } from './hooks/useSocket';
 import { audioManager } from './utils/audioManager';
 import LobbyPage from './pages/LobbyPage';
@@ -9,11 +10,13 @@ import ToastContainer, { type ToastItem } from './components/Toast';
 import MusicToggle from './components/MusicToggle';
 import InfoModal from './components/InfoModal';
 import GlobalChat from './components/GlobalChat';
+import './i18n';
 import './App.css';
 
 let toastId = 0;
 
 export default function App() {
+  const { t } = useTranslation();
   const sock = useSocket();
   const { gameState, errorMsg } = sock;
   const [toasts, setToasts] = useState<ToastItem[]>([]);
@@ -54,21 +57,21 @@ export default function App() {
 
     switch (phase) {
       case 'dice_roll':
-        addToast('주사위를 굴려 선 플레이어를 정합니다!');
+        addToast(t('toast.diceRoll'));
         break;
       case 'prediction':
-        addToast(`라운드 ${gameState.currentRound} — 트릭 승리 횟수를 예측하세요!`);
+        addToast(t('toast.roundStart', { round: gameState.currentRound }));
         break;
       case 'trick_play':
         if (gameState.currentTrickNumber === 1) {
-          addToast(`트릭 플레이 시작!`);
+          addToast(t('toast.trickStart'));
         }
         break;
       case 'round_scoring':
-        addToast(`라운드 ${gameState.currentRound} 결과 발표!`, 'success');
+        addToast(t('toast.roundResult', { round: gameState.currentRound }), 'success');
         break;
       case 'game_over':
-        addToast('게임 종료!', 'success');
+        addToast(t('toast.gameOver'), 'success');
         break;
     }
   }, [gameState?.phase, gameState?.currentRound, gameState?.currentTrickNumber, addToast]);
@@ -103,7 +106,7 @@ export default function App() {
           <button
             className="btn btn-ghost info-toggle-btn"
             onClick={() => setShowInfo(true)}
-            title="게임 규칙"
+            title={t('common.gameRules')}
           >
             ℹ️
           </button>

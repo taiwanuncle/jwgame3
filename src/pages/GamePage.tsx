@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { useSocket } from '../hooks/useSocket';
 import type { ToastItem } from '../components/Toast';
 import type { Card } from '../types';
@@ -12,6 +13,11 @@ import './GamePage.css';
 const SUIT_SYMBOLS: Record<string, string> = {
   spades: '♠', hearts: '♥', diamonds: '♦', clubs: '♣',
 };
+
+// Helper to get translated display name for bot players
+function displayName(p: { nickname: string; botNameKey?: string }, t: (key: string) => string): string {
+  return p.botNameKey ? t(p.botNameKey) : p.nickname;
+}
 
 type Sock = ReturnType<typeof useSocket>;
 interface Props {
@@ -39,6 +45,7 @@ export default function GamePage({ sock, addToast }: Props) {
 
 // ===================== HEADER =====================
 function GameHeader({ gs, sock }: { gs: NonNullable<Sock['gameState']>; sock: Sock }) {
+  const { t } = useTranslation();
   const [showLog, setShowLog] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
 
@@ -46,26 +53,26 @@ function GameHeader({ gs, sock }: { gs: NonNullable<Sock['gameState']>; sock: So
     <div className="game-header">
       <div className="header-left">
         <button className="btn btn-ghost btn-sm" onClick={() => setShowLog(!showLog)}>
-          {showLog ? '✕ 닫기' : '📋 로그'}
+          {showLog ? `✕ ${t('common.close')}` : t('game.log')}
         </button>
         <span className="round-info">
-          R{gs.currentRound}/{gs.totalRounds} ({gs.cardsThisRound}장)
+          {t('game.roundInfo', { current: gs.currentRound, total: gs.totalRounds, cards: gs.cardsThisRound })}
         </span>
       </div>
       <div className="header-center">
-        <span className="trump-badge">♥ 트럼프</span>
+        <span className="trump-badge">{t('game.trump')}</span>
       </div>
       <div className="header-right">
         <MusicToggle />
-        <button className="btn btn-ghost btn-sm" onClick={() => setShowInfo(true)} title="게임 규칙">ℹ️</button>
-        <button className="btn btn-ghost btn-sm" onClick={() => sock.leaveRoom()}>나가기</button>
+        <button className="btn btn-ghost btn-sm" onClick={() => setShowInfo(true)} title={t('common.gameRules')}>ℹ️</button>
+        <button className="btn btn-ghost btn-sm" onClick={() => sock.leaveRoom()}>{t('common.leave')}</button>
       </div>
 
       {showLog && (
         <div className="log-panel glass">
           <div className="log-list">
             {gs.actionLog.slice().reverse().map((entry, i) => (
-              <div key={i} className="log-entry">{entry.message}</div>
+              <div key={i} className="log-entry">{entry.messageKey ? t(entry.messageKey, entry.params || {}) : entry.message}</div>
             ))}
           </div>
         </div>
@@ -102,6 +109,7 @@ function DiceFace({ value, rolling }: { value: number; rolling?: boolean }) {
 type DicePhase = 'waiting' | 'rolling' | 'reveal' | 'tie' | 'winner';
 
 function DiceOverlay({ sock }: { sock: Sock }) {
+  const { t } = useTranslation();
   const dr = sock.diceResult;
   const [roundIdx, setRoundIdx] = useState(0);
   const [phase, setPhase] = useState<DicePhase>('waiting');
@@ -190,7 +198,7 @@ function DiceOverlay({ sock }: { sock: Sock }) {
   if (!dr) return (
     <div className="overlay-panel">
       <div className="dice-container glass">
-        <h2>주사위를 굴립니다!</h2>
+        <h2>{t('game.diceRolling')}</h2>
         <div className="dice-spinner">🎲</div>
       </div>
     </div>
@@ -201,14 +209,14 @@ function DiceOverlay({ sock }: { sock: Sock }) {
       <div className="dice-container glass">
         {phase === 'rolling' && (
           <h2 className="dice-title">
-            {roundIdx === 0 ? '주사위를 굴립니다!' : '다시 굴립니다!'}
+            {roundIdx === 0 ? t('game.diceRolling') : t('game.diceReRolling')}
           </h2>
         )}
-        {phase === 'reveal' && <h2 className="dice-title">결과 확인!</h2>}
-        {phase === 'tie' && <h2 className="dice-title dice-title-tie">동률! 🎲</h2>}
+        {phase === 'reveal' && <h2 className="dice-title">{t('game.diceResult')}</h2>}
+        {phase === 'tie' && <h2 className="dice-title dice-title-tie">{t('game.diceTie')}</h2>}
         {phase === 'winner' && (
           <h2 className="dice-title dice-title-winner">
-            🎯 {dr.winnerName}님이 선!
+            {t('game.diceWinner', { name: dr.winnerName })}
           </h2>
         )}
 
@@ -264,7 +272,7 @@ function DiceOverlay({ sock }: { sock: Sock }) {
         </div>
 
         {phase === 'tie' && (
-          <p className="dice-tie-msg">동률자끼리 다시 굴립니다!</p>
+          <p className="dice-tie-msg">{t('game.diceTieMsg')}</p>
         )}
       </div>
     </div>
@@ -273,6 +281,7 @@ function DiceOverlay({ sock }: { sock: Sock }) {
 
 // ===================== PREDICTION =====================
 function PredictionOverlay({ gs, sock, addToast }: { gs: NonNullable<Sock['gameState']>; sock: Sock; addToast: Props['addToast'] }) {
+  const { t } = useTranslation();
   const [pred, setPred] = useState(0);
   const me = gs.players.find((p) => p.id === gs.myId);
   const submitted = me?.predictionSubmitted ?? false;
@@ -290,7 +299,7 @@ function PredictionOverlay({ gs, sock, addToast }: { gs: NonNullable<Sock['gameS
   function handleSubmit() {
     if (submitted) return;
     sock.submitPrediction(pred);
-    addToast(`예측 제출: ${pred}번 승리`, 'info');
+    addToast(t('game.predSubmitToast', { count: pred }), 'info');
   }
 
   const timeLeft = gs.timerEnd ? Math.max(0, Math.ceil((gs.timerEnd - Date.now()) / 1000)) : null;
@@ -304,17 +313,18 @@ function PredictionOverlay({ gs, sock, addToast }: { gs: NonNullable<Sock['gameS
   const myOrder = leaderIdx >= 0 && myIdx >= 0
     ? ((myIdx - leaderIdx + playerCount) % playerCount) + 1
     : null;
-  const leaderName = gs.players.find(p => p.id === roundLeaderId)?.nickname || '';
+  const leaderPlayer = gs.players.find(p => p.id === roundLeaderId);
+  const leaderName = leaderPlayer ? displayName(leaderPlayer, t) : '';
 
   return (
     <div className="prediction-panel">
       <div className="my-hand-display">
         <div className="hand-header">
-          <label>내 손패</label>
+          <label>{t('game.myHand')}</label>
           <span className="order-info">
             {meIsLeader
-              ? '👑 내가 선! (1번째)'
-              : `👑 선: ${leaderName} | 나는 ${myOrder}번째`}
+              ? t('game.iAmLeader')
+              : t('game.leaderInfo', { leader: leaderName, order: myOrder })}
           </span>
         </div>
         <div className="hand-cards hand-cards-lg">
@@ -326,7 +336,7 @@ function PredictionOverlay({ gs, sock, addToast }: { gs: NonNullable<Sock['gameS
 
       {!submitted ? (
         <div className="prediction-selector glass">
-          <h3>몇 번 이길 수 있을까요?</h3>
+          <h3>{t('game.howManyWins')}</h3>
           <div className="pred-numbers">
             {Array.from({ length: gs.cardsThisRound + 1 }, (_, i) => (
               <button
@@ -337,12 +347,12 @@ function PredictionOverlay({ gs, sock, addToast }: { gs: NonNullable<Sock['gameS
             ))}
           </div>
           <button className="btn btn-primary" onClick={handleSubmit}>
-            {pred}번 승리 예측!
+            {t('game.predictBtn', { count: pred })}
           </button>
           {timeLeft !== null && timeLeft > 0 && (
             <div className="timer-bar">
               <div className="timer-fill" style={{ width: `${(timeLeft / 20) * 100}%` }} />
-              <span className="timer-text">{timeLeft}초</span>
+              <span className="timer-text">{t('game.seconds', { n: timeLeft })}</span>
             </div>
           )}
         </div>
@@ -350,23 +360,23 @@ function PredictionOverlay({ gs, sock, addToast }: { gs: NonNullable<Sock['gameS
         <div className="prediction-waiting glass">
           {revealed ? (
             <>
-              <h3>예측 공개!</h3>
+              <h3>{t('game.predRevealed')}</h3>
               <div className="pred-reveals">
                 {gs.players.map((p) => (
                   <div key={p.id} className="pred-reveal-item">
-                    <span>{p.nickname}</span>
+                    <span>{displayName(p, t)}</span>
                     <span className="pred-reveal-num">{p.prediction}</span>
                   </div>
                 ))}
               </div>
             </>
           ) : (
-            <h3>다른 플레이어를 기다리는 중...</h3>
+            <h3>{t('game.waitingPlayers')}</h3>
           )}
           <div className="submitted-badges">
             {gs.players.map((p) => (
               <span key={p.id} className={`sub-badge ${p.predictionSubmitted ? 'sub-done' : ''}`}>
-                {p.nickname} {p.predictionSubmitted ? '✓' : '...'}
+                {displayName(p, t)} {p.predictionSubmitted ? '✓' : '...'}
               </span>
             ))}
           </div>
@@ -378,6 +388,7 @@ function PredictionOverlay({ gs, sock, addToast }: { gs: NonNullable<Sock['gameS
 
 // ===================== TRICK VIEW =====================
 function TrickView({ gs, sock, addToast }: { gs: NonNullable<Sock['gameState']>; sock: Sock; addToast: Props['addToast'] }) {
+  const { t } = useTranslation();
   const me = gs.players.find((p) => p.id === gs.myId);
   const myHand = me?.hand || [];
   const isMyTurn = gs.currentTurnPlayerId === gs.myId && gs.phase === 'trick_play';
@@ -408,7 +419,7 @@ function TrickView({ gs, sock, addToast }: { gs: NonNullable<Sock['gameState']>;
   function handlePlayCard(card: Card) {
     if (!isMyTurn) return;
     if (!validCardIds.has(card.id)) {
-      addToast('이 카드는 낼 수 없습니다!', 'alert');
+      addToast(t('game.invalidCard'), 'alert');
       return;
     }
     playCardPlay();
@@ -436,14 +447,14 @@ function TrickView({ gs, sock, addToast }: { gs: NonNullable<Sock['gameState']>;
           const isLeader = gs.roundLeadPlayerId === p.id;
           return (
             <div key={p.id} className={`opponent-card ${isActive ? 'opponent-active' : ''} ${!p.connected ? 'opponent-dc' : ''}`}>
-              {isLeader && <span className="leader-badge">👑 선</span>}
+              {isLeader && <span className="leader-badge">{t('game.leader')}</span>}
               <img className="chr-avatar opp-chr" src={getAvatarSrc(p.avatarIndex)} alt="" />
-              <span className="opp-name">{p.nickname}</span>
+              <span className="opp-name">{displayName(p, t)}</span>
               <div className="opp-stats">
-                <span className="opp-pred">예측: {p.prediction ?? '?'}</span>
-                <span className="opp-wins">승리: {p.tricksWon}</span>
+                <span className="opp-pred">{p.prediction !== null && p.prediction !== undefined ? t('game.prediction', { value: p.prediction }) : t('game.predUnknown')}</span>
+                <span className="opp-wins">{t('game.wins', { value: p.tricksWon })}</span>
               </div>
-              {!p.connected && <span className="dc-badge">연결끊김</span>}
+              {!p.connected && <span className="dc-badge">{t('game.disconnected')}</span>}
             </div>
           );
         })}
@@ -452,10 +463,12 @@ function TrickView({ gs, sock, addToast }: { gs: NonNullable<Sock['gameState']>;
       {/* Trick table — cards are md size now (bigger) */}
       <div className="trick-table glass">
         <div className="trick-info">
-          <span>트릭 {gs.currentTrickNumber}/{gs.totalTricksThisRound}</span>
+          <span>{t('game.trickInfo', { current: gs.currentTrickNumber, total: gs.totalTricksThisRound })}</span>
           {gs.trickLeadSuit && (
             <span className="lead-suit">
-              리드: {SUIT_SYMBOLS[gs.trickLeadSuit]} {gs.trickLeadSuit === 'hearts' ? '(트럼프!)' : ''}
+              {gs.trickLeadSuit === 'hearts'
+                ? t('game.leadSuitTrump', { suit: SUIT_SYMBOLS[gs.trickLeadSuit] })
+                : t('game.leadSuit', { suit: SUIT_SYMBOLS[gs.trickLeadSuit] })}
             </span>
           )}
         </div>
@@ -477,8 +490,8 @@ function TrickView({ gs, sock, addToast }: { gs: NonNullable<Sock['gameState']>;
         </div>
         {isTrickResult && trickWinner && (
           <div className="trick-winner-announce">
-            {trickWinner.winnerName}님 승리!
-            {trickWinner.wonByTrump && <span className="trump-win"> ♥ 트럼프!</span>}
+            {t('game.trickWinner', { name: trickWinner.winnerName })}
+            {trickWinner.wonByTrump && <span className="trump-win"> {t('game.trumpWin')}</span>}
           </div>
         )}
       </div>
@@ -486,10 +499,10 @@ function TrickView({ gs, sock, addToast }: { gs: NonNullable<Sock['gameState']>;
       {/* Status */}
       <div className="turn-status">
         {isMyTurn ? (
-          <span className="my-turn-label">당신의 차례! 카드를 선택하세요</span>
+          <span className="my-turn-label">{t('game.myTurn')}</span>
         ) : gs.phase === 'trick_play' ? (
           <span className="waiting-label">
-            {gs.players.find((p) => p.id === gs.currentTurnPlayerId)?.nickname || ''}님의 차례...
+            {t('game.otherTurn', { name: (() => { const p = gs.players.find((p) => p.id === gs.currentTurnPlayerId); return p ? displayName(p, t) : ''; })() })}
           </span>
         ) : null}
         {gs.phase === 'trick_play' && (() => {
@@ -497,17 +510,18 @@ function TrickView({ gs, sock, addToast }: { gs: NonNullable<Sock['gameState']>;
           const meIdx = gs.players.findIndex(p => p.id === gs.myId);
           const cnt = gs.players.length;
           const ord = leadIdx >= 0 && meIdx >= 0 ? ((meIdx - leadIdx + cnt) % cnt) + 1 : null;
-          const leadName = gs.players.find(p => p.id === gs.roundLeadPlayerId)?.nickname || '';
+          const leadPlayer = gs.players.find(p => p.id === gs.roundLeadPlayerId);
+          const leadName = leadPlayer ? displayName(leadPlayer, t) : '';
           return (
             <span className="order-info-small">
-              👑 선: {leadName} | 나는 {ord}번째
+              {t('game.leaderInfo', { leader: leadName, order: ord })}
             </span>
           );
         })()}
         {isMyTurn && timeLeft !== null && timeLeft > 0 && (
           <div className="timer-bar">
             <div className="timer-fill" style={{ width: `${(timeLeft / 30) * 100}%` }} />
-            <span className="timer-text">{timeLeft}초</span>
+            <span className="timer-text">{t('game.seconds', { n: timeLeft })}</span>
           </div>
         )}
       </div>
@@ -515,10 +529,10 @@ function TrickView({ gs, sock, addToast }: { gs: NonNullable<Sock['gameState']>;
       {/* My hand */}
       <div className="my-hand-section">
         <div className="my-player-info">
-          {gs.roundLeadPlayerId === gs.myId && <span className="leader-badge">👑 선</span>}
+          {gs.roundLeadPlayerId === gs.myId && <span className="leader-badge">{t('game.leader')}</span>}
           <img className="chr-avatar my-chr" src={getAvatarSrc(me?.avatarIndex || 0)} alt="" />
-          <span className="my-name">{me?.nickname}</span>
-          <span className="my-stats">예측: {me?.prediction ?? '?'} | 승리: {me?.tricksWon ?? 0}</span>
+          <span className="my-name">{me ? displayName(me, t) : ''}</span>
+          <span className="my-stats">{t('game.myStats', { pred: me?.prediction ?? '?', wins: me?.tricksWon ?? 0 })}</span>
         </div>
         <div className="hand-cards hand-interactive">
           {myHand.map((card) => {
@@ -542,6 +556,7 @@ function TrickView({ gs, sock, addToast }: { gs: NonNullable<Sock['gameState']>;
 
 // ===================== ROUND SCORING =====================
 function RoundScoring({ gs, sock }: { gs: NonNullable<Sock['gameState']>; sock: Sock }) {
+  const { t } = useTranslation();
   const rr = sock.roundResult;
   const playedRef = useRef(false);
 
@@ -555,7 +570,7 @@ function RoundScoring({ gs, sock }: { gs: NonNullable<Sock['gameState']>; sock: 
   if (!rr) return (
     <div className="overlay-panel">
       <div className="scoring-container glass">
-        <h2>점수 계산 중...</h2>
+        <h2>{t('game.scoringTitle')}</h2>
       </div>
     </div>
   );
@@ -563,16 +578,16 @@ function RoundScoring({ gs, sock }: { gs: NonNullable<Sock['gameState']>; sock: 
   return (
     <div className="overlay-panel">
       <div className="scoring-container glass">
-        <h2>라운드 {rr.round} 결과</h2>
+        <h2>{t('game.roundResult', { round: rr.round })}</h2>
         <table className="score-table">
           <thead>
             <tr>
-              <th>플레이어</th>
-              <th>예측</th>
-              <th>실제</th>
-              <th>결과</th>
-              <th>점수</th>
-              <th>총점</th>
+              <th>{t('game.colPlayer')}</th>
+              <th>{t('game.colPrediction')}</th>
+              <th>{t('game.colActual')}</th>
+              <th>{t('game.colResult')}</th>
+              <th>{t('game.colScore')}</th>
+              <th>{t('game.colTotal')}</th>
             </tr>
           </thead>
           <tbody>
@@ -581,7 +596,7 @@ function RoundScoring({ gs, sock }: { gs: NonNullable<Sock['gameState']>; sock: 
                 <td>{ps.playerName}</td>
                 <td>{ps.prediction}</td>
                 <td>{ps.tricksWon}</td>
-                <td>{ps.correct ? '성공!' : '실패'}</td>
+                <td>{ps.correct ? t('game.correct') : t('game.wrong')}</td>
                 <td>+{ps.roundScore}</td>
                 <td className="score-total">{ps.totalScore}</td>
               </tr>
@@ -589,7 +604,7 @@ function RoundScoring({ gs, sock }: { gs: NonNullable<Sock['gameState']>; sock: 
           </tbody>
         </table>
         <button className="btn btn-primary" onClick={() => { sock.nextRound(); playedRef.current = false; }}>
-          {gs.currentRound >= gs.totalRounds ? '최종 결과 보기' : '다음 라운드'}
+          {gs.currentRound >= gs.totalRounds ? t('game.viewFinalResults') : t('game.nextRound')}
         </button>
       </div>
     </div>

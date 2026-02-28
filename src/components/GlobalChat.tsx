@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { useSocket } from '../hooks/useSocket';
 import type { ChatMessage } from '../types';
 import './GlobalChat.css';
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export default function GlobalChat({ sock }: Props) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [msg, setMsg] = useState('');
   const [unread, setUnread] = useState(0);
@@ -52,12 +54,12 @@ export default function GlobalChat({ sock }: Props) {
       {open && (
         <div className="chat-panel glass">
           <div className="chat-header">
-            <span>채팅</span>
+            <span>{t('chat.title')}</span>
             <button className="btn btn-ghost chat-close" onClick={() => setOpen(false)}>✕</button>
           </div>
           <div className="chat-messages" ref={listRef}>
             {messages.length === 0 && (
-              <p className="chat-empty">메시지가 없습니다.</p>
+              <p className="chat-empty">{t('chat.empty')}</p>
             )}
             {messages.map((m, i) => (
               <div key={i} className="chat-msg">
@@ -72,14 +74,14 @@ export default function GlobalChat({ sock }: Props) {
               value={msg}
               onChange={(e) => setMsg(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter') handleSend(); }}
-              placeholder="메시지 입력..."
+              placeholder={t('chat.inputPlaceholder')}
               maxLength={200}
             />
-            <button className="btn btn-primary chat-send" onClick={handleSend}>전송</button>
+            <button className="btn btn-primary chat-send" onClick={handleSend}>{t('chat.send')}</button>
           </div>
         </div>
       )}
-      <button className="btn btn-ghost chat-toggle-btn" onClick={handleOpen} title="채팅">
+      <button className="btn btn-ghost chat-toggle-btn" onClick={handleOpen} title={t('chat.title')}>
         💬
         {unread > 0 && <span className="chat-badge">{unread}</span>}
       </button>

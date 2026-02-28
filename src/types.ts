@@ -38,6 +38,7 @@ export interface Player {
   ready: boolean;
   isHost: boolean;
   isBot: boolean;
+  botNameKey?: string;
   connected: boolean;
   cardCount: number;
   prediction: number | null;
@@ -127,7 +128,9 @@ export interface RoundResult {
 
 // === Action Log ===
 export interface ActionLogEntry {
-  message: string;
+  message: string; // legacy fallback
+  messageKey?: string;
+  params?: Record<string, string | number>;
   timestamp: number;
 }
 

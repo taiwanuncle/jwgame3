@@ -1,0 +1,27 @@
+.lang-toggle {
+  display: flex;
+  gap: 4px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.lang-btn {
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lang-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.lang-btn.active {
+  background: var(--accent);
+  color: white;
+}

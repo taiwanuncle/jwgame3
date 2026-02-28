@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { useSocket } from '../hooks/useSocket';
 import { getAvatarSrc } from '../utils/characters';
 import { playGameOver } from '../utils/sfx';
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function GameOverPage({ sock }: Props) {
+  const { t } = useTranslation();
   const gs = sock.gameState;
   const effectRef = useRef(false);
 
@@ -32,22 +34,22 @@ export default function GameOverPage({ sock }: Props) {
   return (
     <div className="gameover-page">
       <div className="gameover-content glass">
-        <h1 className="gameover-title">게임 종료!</h1>
+        <h1 className="gameover-title">{t('result.gameOver')}</h1>
 
         <div className="winner-section">
           <img className="winner-chr" src={getAvatarSrc(winner?.avatarIndex || 0)} alt="" />
-          <h2 className="winner-name">{winner?.nickname}</h2>
-          <p className="winner-score">{winner?.totalScore}점</p>
-          {isMe && <p className="winner-you">축하합니다!</p>}
+          <h2 className="winner-name">{winner?.botNameKey ? t(winner.botNameKey) : winner?.nickname}</h2>
+          <p className="winner-score">{t('result.points', { score: winner?.totalScore })}</p>
+          {isMe && <p className="winner-you">{t('result.congratulations')}</p>}
         </div>
 
         <div className="final-standings">
           <table className="standings-table">
             <thead>
               <tr>
-                <th>순위</th>
-                <th>플레이어</th>
-                <th>총점</th>
+                <th>{t('result.rank')}</th>
+                <th>{t('result.player')}</th>
+                <th>{t('result.totalScore')}</th>
               </tr>
             </thead>
             <tbody>
@@ -58,9 +60,9 @@ export default function GameOverPage({ sock }: Props) {
                   </td>
                   <td className="standings-player-cell">
                     <img className="chr-avatar-sm" src={getAvatarSrc(p.avatarIndex)} alt="" />
-                    {p.nickname}
+                    {p.botNameKey ? t(p.botNameKey) : p.nickname}
                     {p.isBot && <span className="bot-tag">BOT</span>}
-                    {p.id === gs.myId && <span className="me-tag">나</span>}
+                    {p.id === gs.myId && <span className="me-tag">{t('common.me')}</span>}
                   </td>
                   <td className="score-cell">{p.totalScore}</td>
                 </tr>
@@ -71,22 +73,22 @@ export default function GameOverPage({ sock }: Props) {
 
         {sorted[0]?.roundScores && sorted[0].roundScores.length > 0 && (
           <div className="round-breakdown">
-            <h3>라운드별 점수</h3>
+            <h3>{t('result.roundBreakdown')}</h3>
             <div className="breakdown-scroll">
               <table className="breakdown-table">
                 <thead>
                   <tr>
-                    <th>플레이어</th>
+                    <th>{t('result.player')}</th>
                     {gs.roundSequence.map((cards, i) => (
-                      <th key={i}>R{i + 1}<br /><span className="round-cards">{cards}장</span></th>
+                      <th key={i}>{t('result.roundHeader', { n: i + 1 })}<br /><span className="round-cards">{t('result.cardsCount', { n: cards })}</span></th>
                     ))}
-                    <th>합계</th>
+                    <th>{t('result.sum')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {sorted.map((p) => (
                     <tr key={p.id} className={p.id === gs.myId ? 'standings-me' : ''}>
-                      <td>{p.nickname}</td>
+                      <td>{p.botNameKey ? t(p.botNameKey) : p.nickname}</td>
                       {p.roundScores.map((s, i) => (
                         <td key={i} className={s > 0 ? 'round-success' : 'round-fail'}>
                           {s}
@@ -104,11 +106,11 @@ export default function GameOverPage({ sock }: Props) {
         <div className="gameover-actions">
           {me?.isHost && (
             <button className="btn btn-primary btn-large" onClick={() => sock.playAgain()}>
-              다시 하기
+              {t('result.playAgain')}
             </button>
           )}
           <button className="btn btn-outline" onClick={() => sock.leaveRoom()}>
-            로비로 나가기
+            {t('result.backToLobby')}
           </button>
         </div>
       </div>

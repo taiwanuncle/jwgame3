@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { io, type Socket } from 'socket.io-client';
 import type {
   GameStateFromServer,
@@ -45,6 +46,9 @@ function clearSession() {
 }
 
 export function useSocket() {
+  const { t } = useTranslation();
+  const tRef = useRef(t);
+  tRef.current = t;
   const socketRef = useRef<Socket | null>(null);
   const leavingRef = useRef(false);
   const rejoinAttemptedRef = useRef(false);
@@ -118,8 +122,9 @@ export function useSocket() {
     });
 
     // === Error Message ===
-    socket.on('error_msg', ({ message }: { message: string }) => {
-      setErrorMsg(message);
+    socket.on('error_msg', ({ message, messageKey }: { message: string; messageKey?: string }) => {
+      const msg = messageKey ? tRef.current(messageKey) : message;
+      setErrorMsg(msg);
       setTimeout(() => setErrorMsg(''), 3000);
     });
 
