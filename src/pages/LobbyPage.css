@@ -268,32 +268,144 @@
 }
 .about-body h3 {
   font-size: 0.95rem;
-  color: var(--text-primary);
+  color: var(--accent-light);
   margin-bottom: 2px;
+  font-weight: 700;
 }
 .about-body p {
   font-size: 0.85rem;
   color: var(--text-secondary);
   line-height: 1.5;
 }
-.about-body a {
+
+/* Contact Card */
+.contact-card {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.contact-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.contact-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.contact-value {
+  font-size: 0.85rem;
+  font-weight: 500;
   color: var(--accent-light);
   text-decoration: none;
+  word-break: break-all;
 }
-.about-body a:hover {
+.contact-value:hover {
   text-decoration: underline;
 }
-.sponsor-btn {
-  display: inline-block;
+.kakao-channel-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 20px;
+  background: #FEE500;
+  color: #191919;
+  border-radius: 24px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: all var(--transition-fast);
   text-align: center;
-  text-decoration: none !important;
-  margin-top: var(--gap-xs);
-  padding: 12px 24px;
-  font-size: 0.95rem;
 }
-.about-footer-note {
-  font-size: 0.75rem !important;
+.kakao-channel-btn:hover {
+  opacity: 0.85;
+  transform: scale(1.02);
+}
+
+/* Donate Card */
+.donate-card {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: var(--radius-md);
+  padding: 20px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.donate-card p {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+.kakao-pay-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: #FEE500;
+  color: #191919;
+  border-radius: 24px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+}
+.kakao-pay-btn:hover {
+  opacity: 0.85;
+  transform: scale(1.02);
+}
+
+/* QR: mobile = link only, desktop = QR code */
+.donate-mobile-link {
+  display: inline-flex;
+}
+.donate-qr-desktop {
+  display: none;
+  text-align: center;
+}
+.donate-qr-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+.donate-qr-img {
+  border-radius: var(--radius-md);
+  border: 2px solid var(--glass-border);
+}
+
+@media (min-width: 768px) {
+  .donate-mobile-link {
+    display: none;
+  }
+  .donate-qr-desktop {
+    display: block;
+  }
+}
+@media (hover: none) and (pointer: coarse) {
+  .donate-mobile-link {
+    display: inline-flex !important;
+  }
+  .donate-qr-desktop {
+    display: none !important;
+  }
+}
+
+/* Copyright */
+.about-copyright {
   padding-top: var(--gap-md);
   border-top: 1px solid var(--glass-border);
+}
+.about-copyright h3 {
+  color: var(--accent-light);
+}
+.about-copyright p {
+  font-size: 0.8rem !important;
+  color: var(--text-muted);
+  text-align: center;
 }

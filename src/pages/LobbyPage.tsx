@@ -117,24 +117,53 @@ export default function LobbyPage({ sock, addToast }: Props) {
                   <p>이 게임은 가족과 친구들이 함께 즐길 수 있는 온라인 카드게임을 만들고자 제작되었습니다.</p>
                   <p>클래식 트릭테이킹 카드게임 "예(Yeah!!)"를 어디서든 함께 할 수 있도록 만들었습니다.</p>
                 </section>
-                <section>
-                  <h3>📬 개발자에게 연락하기</h3>
-                  <p>개선 사항이나 건의가 있다면 언제든 연락해 주세요.</p>
-                  <p>📧 이메일: <a href="mailto:atshane81@gmail.com">atshane81@gmail.com</a></p>
-                  <p>💬 카카오톡 채널: <a href="https://pf.kakao.com/_exghAX" target="_blank" rel="noopener noreferrer">카카오톡 채널 바로가기</a></p>
-                </section>
-                <section>
-                  <h3>💛 후원</h3>
-                  <p>이 게임이 재미있으셨다면 후원으로 응원해 주세요!</p>
-                  <a className="btn btn-primary sponsor-btn" href="https://qr.kakaopay.com/FN0023EGr" target="_blank" rel="noopener noreferrer">
+
+                <h3>📬 개발자에게 연락하기</h3>
+                <div className="contact-card">
+                  <div className="contact-row">
+                    <span className="contact-label">📧 이메일</span>
+                    <a href="mailto:atshane81@gmail.com" className="contact-value">atshane81@gmail.com</a>
+                  </div>
+                  <a
+                    href="https://pf.kakao.com/_exghAX"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="kakao-channel-btn"
+                  >
+                    💬 카카오톡 채널
+                  </a>
+                </div>
+
+                <h3>💛 후원</h3>
+                <div className="donate-card">
+                  <p>이 게임이 도움이 되셨다면 후원으로 응원해 주세요!</p>
+                  <a
+                    href="https://qr.kakaopay.com/FN0023EGr"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="kakao-pay-btn donate-mobile-link"
+                  >
                     💛 카카오페이로 후원하기
                   </a>
-                  <p className="text-muted" style={{ fontSize: '0.75rem', marginTop: '8px' }}>PC에서는 QR코드를 스캔해 주세요</p>
+                  <div className="donate-qr-desktop">
+                    <p className="donate-qr-label">PC에서는 QR코드를 스캔해 주세요</p>
+                    <img
+                      className="donate-qr-img"
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent('https://qr.kakaopay.com/FN0023EGr')}`}
+                      alt="카카오페이 후원 QR코드"
+                      width={180}
+                      height={180}
+                    />
+                  </div>
+                </div>
+
+                <section className="about-copyright">
+                  <h3>저작권 안내</h3>
+                  <p>
+                    사용되는 모든 그림과 음악은 AI로 제작되었습니다.<br />
+                    본 게임은 비영리 목적으로 제작되었습니다.
+                  </p>
                 </section>
-                <p className="about-footer-note text-muted">
-                  사용되는 모든 그림과 음악은 AI로 제작되었습니다.<br />
-                  본 게임은 비영리 목적으로 제작되었습니다.
-                </p>
               </div>
             </div>
           </div>
