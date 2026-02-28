@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { useSocket } from '../hooks/useSocket';
 import type { ToastItem } from '../components/Toast';
 import type { BotDifficulty } from '../types';
 import { CHARACTERS } from '../utils/characters';
 import { generateRandomName } from '../utils/randomName';
-import { audioManager } from '../utils/audioManager';
 import { playClick } from '../utils/sfx';
 import InfoModal from '../components/InfoModal';
+import PlaylistModal from '../components/PlaylistModal';
 import './LobbyPage.css';
 
 type Sock = ReturnType<typeof useSocket>;
@@ -28,13 +28,7 @@ export default function LobbyPage({ sock, addToast }: Props) {
   const [roomCode, setRoomCode] = useState('');
   const [showInfo, setShowInfo] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
-  const [, setMusicTick] = useState(0);
-
-  useEffect(() => {
-    return audioManager.subscribe(() => setMusicTick((t) => t + 1));
-  }, []);
-
-  const isMusicOn = audioManager.playing && !audioManager.muted;
+  const [showPlaylist, setShowPlaylist] = useState(false);
 
   function saveNickname(name: string) {
     setNickname(name);
@@ -95,8 +89,8 @@ export default function LobbyPage({ sock, addToast }: Props) {
           <button className="lobby-footer-btn" onClick={() => { playClick(); setShowInfo(true); }}>
             📖 게임 방법
           </button>
-          <button className="lobby-footer-btn" onClick={() => { playClick(); audioManager.toggleMute(); }}>
-            {isMusicOn ? '🎵' : '🔇'} 음악
+          <button className="lobby-footer-btn" onClick={() => { playClick(); setShowPlaylist(true); }}>
+            🎵 음악
           </button>
           <button className="lobby-footer-btn" onClick={() => { playClick(); setShowAbout(true); }}>
             💝 제작계기 & 후원
@@ -104,6 +98,7 @@ export default function LobbyPage({ sock, addToast }: Props) {
         </div>
 
         {showInfo && <InfoModal onClose={() => setShowInfo(false)} />}
+        {showPlaylist && <PlaylistModal onClose={() => setShowPlaylist(false)} />}
         {showAbout && (
           <div className="overlay" onClick={() => setShowAbout(false)}>
             <div className="modal about-modal" onClick={(e) => e.stopPropagation()}>
