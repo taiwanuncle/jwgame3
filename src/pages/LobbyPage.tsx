@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { useSocket } from '../hooks/useSocket';
 import type { ToastItem } from '../components/Toast';
 import type { BotDifficulty } from '../types';
 import { CHARACTERS } from '../utils/characters';
 import { generateRandomName } from '../utils/randomName';
+import { audioManager } from '../utils/audioManager';
 import { playClick } from '../utils/sfx';
+import InfoModal from '../components/InfoModal';
 import './LobbyPage.css';
 
 type Sock = ReturnType<typeof useSocket>;
@@ -24,6 +26,15 @@ export default function LobbyPage({ sock, addToast }: Props) {
   const [botCount, setBotCount] = useState(3);
   const [botDiff, setBotDiff] = useState<BotDifficulty>('medium');
   const [roomCode, setRoomCode] = useState('');
+  const [showInfo, setShowInfo] = useState(false);
+  const [showAbout, setShowAbout] = useState(false);
+  const [, setMusicTick] = useState(0);
+
+  useEffect(() => {
+    return audioManager.subscribe(() => setMusicTick((t) => t + 1));
+  }, []);
+
+  const isMusicOn = audioManager.playing && !audioManager.muted;
 
   function saveNickname(name: string) {
     setNickname(name);
@@ -70,16 +81,64 @@ export default function LobbyPage({ sock, addToast }: Props) {
           <p className="lobby-subtitle">트릭테이킹 카드 게임</p>
         </div>
         <div className="lobby-buttons">
-          <button className="btn btn-primary btn-large" onClick={() => { playClick(); setView('single'); }}>
-            1인 플레이 (AI 상대)
-          </button>
-          <button className="btn btn-outline btn-large" onClick={() => { playClick(); setView('create'); }}>
+          <button className="btn btn-primary btn-large" onClick={() => { playClick(); setView('create'); }}>
             방 만들기
           </button>
           <button className="btn btn-outline btn-large" onClick={() => { playClick(); setView('join'); sock.refreshRooms?.(); }}>
             방 참가하기
           </button>
+          <button className="btn btn-outline btn-large" onClick={() => { playClick(); setView('single'); }}>
+            1인 플레이 (AI 상대)
+          </button>
         </div>
+        <div className="lobby-footer">
+          <button className="lobby-footer-btn" onClick={() => { playClick(); setShowInfo(true); }}>
+            📖 게임 방법
+          </button>
+          <button className="lobby-footer-btn" onClick={() => { playClick(); audioManager.toggleMute(); }}>
+            {isMusicOn ? '🎵' : '🔇'} 음악
+          </button>
+          <button className="lobby-footer-btn" onClick={() => { playClick(); setShowAbout(true); }}>
+            💝 제작계기 & 후원
+          </button>
+        </div>
+
+        {showInfo && <InfoModal onClose={() => setShowInfo(false)} />}
+        {showAbout && (
+          <div className="overlay" onClick={() => setShowAbout(false)}>
+            <div className="modal about-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="about-header">
+                <h2>제작계기 & 후원</h2>
+                <button className="btn btn-ghost info-close" onClick={() => setShowAbout(false)}>✕</button>
+              </div>
+              <div className="about-body">
+                <section>
+                  <h3>🎮 제작 계기</h3>
+                  <p>이 게임은 가족과 친구들이 함께 즐길 수 있는 온라인 카드게임을 만들고자 제작되었습니다.</p>
+                  <p>클래식 트릭테이킹 카드게임 "예(Yeah!!)"를 어디서든 함께 할 수 있도록 만들었습니다.</p>
+                </section>
+                <section>
+                  <h3>📬 개발자에게 연락하기</h3>
+                  <p>개선 사항이나 건의가 있다면 언제든 연락해 주세요.</p>
+                  <p>📧 이메일: <a href="mailto:atshane81@gmail.com">atshane81@gmail.com</a></p>
+                  <p>💬 카카오톡 채널: <a href="https://pf.kakao.com/_exghAX" target="_blank" rel="noopener noreferrer">카카오톡 채널 바로가기</a></p>
+                </section>
+                <section>
+                  <h3>💛 후원</h3>
+                  <p>이 게임이 재미있으셨다면 후원으로 응원해 주세요!</p>
+                  <a className="btn btn-primary sponsor-btn" href="https://qr.kakaopay.com/FN0023EGr" target="_blank" rel="noopener noreferrer">
+                    💛 카카오페이로 후원하기
+                  </a>
+                  <p className="text-muted" style={{ fontSize: '0.75rem', marginTop: '8px' }}>PC에서는 QR코드를 스캔해 주세요</p>
+                </section>
+                <p className="about-footer-note text-muted">
+                  사용되는 모든 그림과 음악은 AI로 제작되었습니다.<br />
+                  본 게임은 비영리 목적으로 제작되었습니다.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
