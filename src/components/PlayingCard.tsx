@@ -20,13 +20,14 @@ interface Props {
   disabled?: boolean;
   highlight?: boolean;
   small?: boolean;
+  size?: 'sm' | 'md' | 'lg';
   winner?: boolean;
   dealDelay?: number;
 }
 
-export default function PlayingCard({ card, onClick, disabled, highlight, small, winner, dealDelay }: Props) {
+export default function PlayingCard({ card, onClick, disabled, highlight, small, size: sizeProp, winner, dealDelay }: Props) {
   const isRed = card.suit === 'hearts' || card.suit === 'diamonds';
-  const size = small ? 'sm' : 'md';
+  const size = sizeProp || (small ? 'sm' : 'md');
 
   const cardClasses = [
     'playing-card',

@@ -154,6 +154,7 @@ export interface GameState {
   trickCards: PlayedCard[];
   trickLeadSuit: Suit | null;
   trickLeadPlayerId: string | null;
+  roundLeadPlayerId: string | null;
 
   // Dice
   diceResults: DiceRollEntry[];

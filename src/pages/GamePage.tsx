@@ -295,13 +295,31 @@ function PredictionOverlay({ gs, sock, addToast }: { gs: NonNullable<Sock['gameS
 
   const timeLeft = gs.timerEnd ? Math.max(0, Math.ceil((gs.timerEnd - Date.now()) / 1000)) : null;
 
+  // Leader & order info
+  const roundLeaderId = gs.roundLeadPlayerId;
+  const meIsLeader = roundLeaderId === gs.myId;
+  const leaderIdx = gs.players.findIndex(p => p.id === roundLeaderId);
+  const myIdx = gs.players.findIndex(p => p.id === gs.myId);
+  const playerCount = gs.players.length;
+  const myOrder = leaderIdx >= 0 && myIdx >= 0
+    ? ((myIdx - leaderIdx + playerCount) % playerCount) + 1
+    : null;
+  const leaderName = gs.players.find(p => p.id === roundLeaderId)?.nickname || '';
+
   return (
     <div className="prediction-panel">
       <div className="my-hand-display">
-        <label>내 손패</label>
-        <div className="hand-cards">
+        <div className="hand-header">
+          <label>내 손패</label>
+          <span className="order-info">
+            {meIsLeader
+              ? '👑 내가 선! (1번째)'
+              : `👑 선: ${leaderName} | 나는 ${myOrder}번째`}
+          </span>
+        </div>
+        <div className="hand-cards hand-cards-lg">
           {myHand.map((card) => (
-            <PlayingCard key={card.id} card={card} small />
+            <PlayingCard key={card.id} card={card} size="lg" />
           ))}
         </div>
       </div>
@@ -415,8 +433,10 @@ function TrickView({ gs, sock, addToast }: { gs: NonNullable<Sock['gameState']>;
       <div className="opponents-row">
         {gs.players.filter((p) => p.id !== gs.myId).map((p) => {
           const isActive = gs.currentTurnPlayerId === p.id;
+          const isLeader = gs.roundLeadPlayerId === p.id;
           return (
             <div key={p.id} className={`opponent-card ${isActive ? 'opponent-active' : ''} ${!p.connected ? 'opponent-dc' : ''}`}>
+              {isLeader && <span className="leader-badge">👑 선</span>}
               <img className="chr-avatar opp-chr" src={getAvatarSrc(p.avatarIndex)} alt="" />
               <span className="opp-name">{p.nickname}</span>
               <div className="opp-stats">
@@ -472,6 +492,18 @@ function TrickView({ gs, sock, addToast }: { gs: NonNullable<Sock['gameState']>;
             {gs.players.find((p) => p.id === gs.currentTurnPlayerId)?.nickname || ''}님의 차례...
           </span>
         ) : null}
+        {gs.phase === 'trick_play' && (() => {
+          const leadIdx = gs.players.findIndex(p => p.id === gs.roundLeadPlayerId);
+          const meIdx = gs.players.findIndex(p => p.id === gs.myId);
+          const cnt = gs.players.length;
+          const ord = leadIdx >= 0 && meIdx >= 0 ? ((meIdx - leadIdx + cnt) % cnt) + 1 : null;
+          const leadName = gs.players.find(p => p.id === gs.roundLeadPlayerId)?.nickname || '';
+          return (
+            <span className="order-info-small">
+              👑 선: {leadName} | 나는 {ord}번째
+            </span>
+          );
+        })()}
         {isMyTurn && timeLeft !== null && timeLeft > 0 && (
           <div className="timer-bar">
             <div className="timer-fill" style={{ width: `${(timeLeft / 30) * 100}%` }} />
@@ -483,6 +515,7 @@ function TrickView({ gs, sock, addToast }: { gs: NonNullable<Sock['gameState']>;
       {/* My hand */}
       <div className="my-hand-section">
         <div className="my-player-info">
+          {gs.roundLeadPlayerId === gs.myId && <span className="leader-badge">👑 선</span>}
           <img className="chr-avatar my-chr" src={getAvatarSrc(me?.avatarIndex || 0)} alt="" />
           <span className="my-name">{me?.nickname}</span>
           <span className="my-stats">예측: {me?.prediction ?? '?'} | 승리: {me?.tricksWon ?? 0}</span>
@@ -494,6 +527,7 @@ function TrickView({ gs, sock, addToast }: { gs: NonNullable<Sock['gameState']>;
               <PlayingCard
                 key={card.id}
                 card={card}
+                size="lg"
                 onClick={isMyTurn ? () => handlePlayCard(card) : undefined}
                 highlight={isMyTurn && isValid}
                 disabled={isMyTurn && !isValid}

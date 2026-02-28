@@ -1,23 +1,23 @@
 .gameover-page {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   height: 100%;
-  padding: var(--gap-xl);
+  padding: var(--gap-md);
   overflow-y: auto;
 }
 
 .gameover-content {
   max-width: 520px;
   width: 100%;
-  padding: var(--gap-2xl);
+  padding: var(--gap-xl);
   text-align: center;
   animation: slide-up 0.5s var(--ease-out);
 }
 
 .gameover-title {
-  font-size: 2rem;
-  margin-bottom: var(--gap-xl);
+  font-size: 1.6rem;
+  margin-bottom: var(--gap-lg);
   background: linear-gradient(135deg, var(--gold-light), var(--gold));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -25,11 +25,11 @@
 }
 
 .winner-section {
-  margin-bottom: var(--gap-xl);
+  margin-bottom: var(--gap-lg);
 }
 .winner-chr {
-  width: 72px;
-  height: 72px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   object-fit: cover;
   display: block;
@@ -49,12 +49,20 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .winner-name {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 .winner-score {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-weight: 800;
   color: var(--gold-light);
 }
@@ -70,16 +78,16 @@
 .standings-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
 }
 .standings-table th {
-  padding: var(--gap-sm);
+  padding: var(--gap-xs) var(--gap-sm);
   color: var(--text-muted);
   font-weight: 600;
   border-bottom: 1px solid var(--glass-border);
 }
 .standings-table td {
-  padding: var(--gap-sm) var(--gap-md);
+  padding: var(--gap-xs) var(--gap-sm);
 }
 .standings-me {
   background: rgba(59, 130, 246, 0.1);
@@ -154,4 +162,58 @@
   flex-direction: column;
   gap: var(--gap-md);
   align-items: center;
+}
+
+/* === Mobile Responsive === */
+@media (max-width: 480px) {
+  .gameover-page {
+    padding: var(--gap-sm);
+  }
+  .gameover-content {
+    padding: var(--gap-md);
+  }
+  .gameover-title {
+    font-size: 1.3rem;
+    margin-bottom: var(--gap-md);
+  }
+  .winner-chr {
+    width: 48px;
+    height: 48px;
+  }
+  .winner-name {
+    font-size: 1rem;
+  }
+  .winner-score {
+    font-size: 1.2rem;
+  }
+  .standings-table {
+    font-size: 0.75rem;
+  }
+  .standings-table th,
+  .standings-table td {
+    padding: 3px 4px;
+  }
+  .standings-player-cell {
+    max-width: 100px;
+  }
+  .chr-avatar-sm {
+    width: 20px;
+    height: 20px;
+  }
+  .rank-cell {
+    font-size: 1rem;
+  }
+  .score-cell {
+    font-size: 0.9rem;
+  }
+  .breakdown-table {
+    font-size: 0.68rem;
+  }
+  .breakdown-table th,
+  .breakdown-table td {
+    padding: 3px 4px;
+  }
+  .round-breakdown h3 {
+    font-size: 0.85rem;
+  }
 }

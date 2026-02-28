@@ -343,6 +343,9 @@ function buildPersonalState(room, playerId) {
     trickCards: room.trickCards,
     trickLeadSuit: room.trickLeadSuit,
     trickLeadPlayerId: room.trickLeadPlayerId,
+    roundLeadPlayerId: room.currentRoundLeadIndex != null
+      ? room.players[room.currentRoundLeadIndex]?.id || null
+      : null,
     diceResults: room.diceResults,
     timerEnd: room.timerEnd,
     actionLog: room.actionLog.slice(-20),

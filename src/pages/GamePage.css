@@ -231,6 +231,23 @@
 .my-hand-display {
   text-align: center;
 }
+.hand-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-md);
+  margin-bottom: var(--gap-sm);
+}
+.hand-header label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+.order-info {
+  font-size: 0.8rem;
+  color: var(--gold-light);
+  font-weight: 600;
+}
 .my-hand-display label {
   display: block;
   font-size: 0.85rem;
@@ -243,6 +260,9 @@
   justify-content: center;
   gap: var(--gap-sm);
   flex-wrap: wrap;
+}
+.hand-cards-lg {
+  gap: var(--gap-md);
 }
 
 .prediction-selector,
@@ -422,6 +442,26 @@
   font-size: 0.6rem;
   color: var(--danger);
 }
+.leader-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--gold-light);
+  background: rgba(245, 158, 11, 0.15);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  animation: leader-glow 2s ease infinite;
+}
+@keyframes leader-glow {
+  0%, 100% { box-shadow: 0 0 4px rgba(245, 158, 11, 0.2); }
+  50% { box-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }
+}
+.order-info-small {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--gold-light);
+  margin-top: 2px;
+}
 
 /* ===== TRICK TABLE ===== */
 .trick-table {
@@ -462,8 +502,8 @@
   color: var(--text-muted);
 }
 .trick-card-empty .card-placeholder {
-  width: 72px;
-  height: 97px;
+  width: 80px;
+  height: 108px;
   border-radius: 10px;
   border: 2px dashed var(--glass-border);
   background: transparent;

@@ -65,7 +65,7 @@ export default function LobbyPage({ sock, addToast }: Props) {
     return (
       <div className="lobby-page" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
         <div className="lobby-title">
-          <span className="lobby-icon">🃏</span>
+          <img className="lobby-logo" src="/logo/opening.png" alt="예(Yeah!!)" draggable={false} />
           <h1>예(Yeah!!)</h1>
           <p className="lobby-subtitle">트릭테이킹 카드 게임</p>
         </div>
