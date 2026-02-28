@@ -43,9 +43,10 @@ export default function WaitingRoom({ sock, addToast }: Props) {
             <img className="chr-avatar player-chr" src={getAvatarSrc(p.avatarIndex)} alt="" />
             <div className="player-info-text">
               <span className="player-name">
-                {p.nickname}
+                <span className="player-nick">{p.nickname}</span>
                 {p.isHost && <span className="host-badge">방장</span>}
                 {p.isBot && <span className="bot-badge">BOT</span>}
+                {p.id === gs.myId && <span className="me-badge">나</span>}
               </span>
             </div>
             <span className={`ready-status ${p.ready || p.isHost ? 'ready' : ''}`}>
