@@ -54,6 +54,7 @@ export default function InfoModal({ onClose }: Props) {
               <li>{t('info.trick2')}</li>
               <li>{t('info.trick3')}</li>
               <li>{t('info.trick4')}</li>
+              <li>{t('info.trick5')}</li>
             </ul>
           </section>
 
@@ -62,6 +63,7 @@ export default function InfoModal({ onClose }: Props) {
             <ul>
               <li>{t('info.scoring1')}</li>
               <li>{t('info.scoring2')}</li>
+              <li>{t('info.scoring3')}</li>
             </ul>
           </section>
         </div>

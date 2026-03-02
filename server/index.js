@@ -1062,12 +1062,19 @@ io.on('connection', (socket) => {
     const room = rooms.get(roomCode);
 
     if (!room) {
-      socket.emit('error_msg', { message: '방을 찾을 수 없습니다.', messageKey: 'server.roomNotFound' });
+      socket.emit('rejoin_failed');
       return;
     }
+
+    // Don't rejoin a game that's already over
+    if (room.phase === PHASES.GAME_OVER) {
+      socket.emit('rejoin_failed');
+      return;
+    }
+
     const player = room.players.find(p => p.id === persistentId);
     if (!player) {
-      socket.emit('error_msg', { message: '방에서 플레이어를 찾을 수 없습니다.', messageKey: 'server.playerNotFound' });
+      socket.emit('rejoin_failed');
       return;
     }
 
@@ -1296,6 +1303,24 @@ function handleLeaveRoom(socket, playerId, roomCode) {
 
   const player = room.players[playerIdx];
   const wasHost = player.isHost;
+  const isActiveGame = room.phase !== PHASES.WAITING && room.phase !== PHASES.GAME_OVER;
+
+  // If host leaves during an active game, end the game for everyone
+  if (wasHost && isActiveGame) {
+    clearRoomTimer(room);
+    // Notify all remaining players that the room is closed
+    emitToRoom(room, 'room_closed', { reason: 'host_left' });
+    // Remove all players from socket room
+    for (const p of room.players) {
+      if (p.isBot) continue;
+      const sock = getSocketForPlayer(room, p.id);
+      if (sock) sock.leave(roomCode);
+    }
+    socket.leave(roomCode);
+    rooms.delete(roomCode);
+    emitRoomsUpdate();
+    return;
+  }
 
   room.players.splice(playerIdx, 1);
   delete room.socketMap[playerId];

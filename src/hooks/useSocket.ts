@@ -152,6 +152,28 @@ export function useSocket() {
       saveSession(roomCode, persistentId);
     });
 
+    // === Rejoin Failed (stale session — room gone or game over) ===
+    socket.on('rejoin_failed', () => {
+      sessionRef.current = null;
+      currentRoomRef.current = null;
+      clearSession();
+    });
+
+    // === Room Closed (host left during active game) ===
+    socket.on('room_closed', () => {
+      currentRoomRef.current = null;
+      sessionRef.current = null;
+      clearSession();
+      setGameState(null);
+      setDiceResult(null);
+      setTrickResult(null);
+      setRoundResult(null);
+      setChatMessages([]);
+      const msg = tRef.current('server.roomClosedHostLeft');
+      setErrorMsg(msg);
+      setTimeout(() => setErrorMsg(''), 4000);
+    });
+
     // === Game Started ===
     socket.on('game_started', () => {
       setRoundResult(null);
