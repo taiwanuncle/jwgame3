@@ -49,9 +49,6 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  max-width: 160px;
-  overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 .winner-name {
@@ -94,11 +91,15 @@
 }
 .rank-cell {
   font-size: 1.2rem;
+  width: 40px;
+  text-align: center;
 }
 .score-cell {
   font-weight: 800;
   color: var(--gold-light);
   font-size: 1.1rem;
+  width: 60px;
+  text-align: right;
 }
 .bot-tag {
   font-size: 0.65rem;
@@ -194,7 +195,7 @@
     padding: 3px 4px;
   }
   .standings-player-cell {
-    max-width: 100px;
+    flex-wrap: nowrap;
   }
   .chr-avatar-sm {
     width: 20px;

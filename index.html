@@ -8,6 +8,31 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Detect in-app browsers (KakaoTalk, LINE, Facebook, Instagram) and prompt external browser
+      (function() {
+        var ua = navigator.userAgent || '';
+        var isKakao = /KAKAOTALK/i.test(ua);
+        var isLine = /Line\//i.test(ua);
+        var isFB = /FBAN|FBAV/i.test(ua);
+        var isInsta = /Instagram/i.test(ua);
+        if (isKakao || isLine || isFB || isInsta) {
+          var url = location.href;
+          // Android: intent scheme to open in Chrome/default browser
+          if (/android/i.test(ua)) {
+            location.href = 'intent://' + url.replace(/https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;end';
+            return;
+          }
+          // iOS: show banner to open in Safari
+          var banner = document.createElement('div');
+          banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#1a1a2e;color:#fff;padding:16px;text-align:center;font-size:14px;font-family:sans-serif;box-shadow:0 2px 8px rgba(0,0,0,0.3);';
+          banner.innerHTML = '<div style="margin-bottom:8px">이 게임은 외부 브라우저에서 열어야 합니다</div>' +
+            '<a href="' + url + '" target="_blank" style="display:inline-block;padding:8px 20px;background:#3b82f6;color:#fff;border-radius:8px;text-decoration:none;font-weight:bold;">Safari에서 열기</a>' +
+            '<div style="margin-top:6px;font-size:11px;color:#999;">우측 상단 ⋮ 메뉴 → 다른 브라우저로 열기</div>';
+          document.body.appendChild(banner);
+        }
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
