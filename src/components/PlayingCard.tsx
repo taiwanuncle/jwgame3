@@ -11,7 +11,7 @@ const SUIT_TO_FILE: Record<Suit, string> = {
 };
 
 function getCardImageUrl(suit: Suit, rank: string): string {
-  return `/cards/${SUIT_TO_FILE[suit]}_${rank}.png`;
+  return `/cards/${SUIT_TO_FILE[suit]}_${rank}.webp`;
 }
 
 interface Props {
@@ -56,7 +56,7 @@ export default function PlayingCard({ card, onClick, disabled, highlight, small,
       {/* Back face — shown by default */}
       <div className="card-back">
         <img
-          src="/cards/back.png"
+          src="/cards/back.webp"
           alt="card back"
           className="back-image"
           draggable={false}
@@ -98,7 +98,7 @@ export function CardBack({ small }: { small?: boolean }) {
       <div className="card-flip-inner">
         <div className="card-face-img" />
         <div className="card-back">
-          <img src="/cards/back.png" alt="card back" className="back-image" draggable={false} />
+          <img src="/cards/back.webp" alt="card back" className="back-image" draggable={false} />
         </div>
       </div>
     </div>

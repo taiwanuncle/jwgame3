@@ -297,7 +297,6 @@ function PredictionOverlay({ gs, sock, addToast }: { gs: NonNullable<Sock['gameS
     }
   }, [allDone]);
 
-  // Play sound when it becomes my turn
   useEffect(() => {
     if (isMyTurn) {
       playMyTurn();
@@ -312,7 +311,7 @@ function PredictionOverlay({ gs, sock, addToast }: { gs: NonNullable<Sock['gameS
 
   const timeLeft = gs.timerEnd ? Math.max(0, Math.ceil((gs.timerEnd - Date.now()) / 1000)) : null;
 
-  // Build prediction order for display (from lead player clockwise)
+  // Build prediction order (from lead player clockwise)
   const roundLeaderId = gs.roundLeadPlayerId;
   const leaderIdx = gs.players.findIndex(p => p.id === roundLeaderId);
   const playerCount = gs.players.length;
@@ -322,9 +321,15 @@ function PredictionOverlay({ gs, sock, addToast }: { gs: NonNullable<Sock['gameS
     orderedPlayers.push(gs.players[idx]);
   }
 
+  // My order position (1-based from lead)
+  const meIdx = gs.players.findIndex(p => p.id === gs.myId);
+  const myOrder = leaderIdx >= 0 && meIdx >= 0 ? ((meIdx - leaderIdx + playerCount) % playerCount) + 1 : null;
+  const leadPlayer = gs.players.find(p => p.id === roundLeaderId);
+  const leadName = leadPlayer ? displayName(leadPlayer, t) : '';
+
   return (
     <div className="prediction-panel prediction-sequential">
-      {/* Opponents row — show prediction status like trick view */}
+      {/* Opponents row — prediction status */}
       <div className="opponents-row">
         {orderedPlayers.filter(p => p.id !== gs.myId).map((p) => {
           const isCurrentTurn = gs.currentPredictionTurnPlayerId === p.id;
@@ -352,8 +357,30 @@ function PredictionOverlay({ gs, sock, addToast }: { gs: NonNullable<Sock['gameS
         })}
       </div>
 
-      {/* Center area */}
-      <div className="prediction-center glass">
+      {/* My hand cards — center, prominent */}
+      <div className="pred-hand-center">
+        <div className="my-player-info">
+          {gs.roundLeadPlayerId === gs.myId && <span className="leader-badge">{t('game.leader')}</span>}
+          <img className="chr-avatar my-chr" src={getAvatarSrc(me?.avatarIndex || 0)} alt="" />
+          <span className="my-name">{me ? displayName(me, t) : ''}</span>
+          <span className="my-stats">
+            {submitted
+              ? t('game.myStats', { pred: me?.prediction ?? '?', wins: me?.tricksWon ?? 0 })
+              : t('game.myStatsDash')}
+          </span>
+        </div>
+        <div className="hand-cards hand-cards-lg">
+          {myHand.map((card) => (
+            <PlayingCard key={card.id} card={card} size="lg" />
+          ))}
+        </div>
+        <span className="order-info-small">
+          {t('game.leaderInfo', { leader: leadName, order: myOrder })}
+        </span>
+      </div>
+
+      {/* Prediction action area — below cards */}
+      <div className="pred-action-area glass">
         {allDone ? (
           <>
             <h3>{t('game.predAllDone')}</h3>
@@ -399,25 +426,6 @@ function PredictionOverlay({ gs, sock, addToast }: { gs: NonNullable<Sock['gameS
             })()}
           </div>
         )}
-      </div>
-
-      {/* My hand & info */}
-      <div className="my-hand-section">
-        <div className="my-player-info">
-          {gs.roundLeadPlayerId === gs.myId && <span className="leader-badge">{t('game.leader')}</span>}
-          <img className="chr-avatar my-chr" src={getAvatarSrc(me?.avatarIndex || 0)} alt="" />
-          <span className="my-name">{me ? displayName(me, t) : ''}</span>
-          <span className="my-stats">
-            {submitted
-              ? t('game.myStats', { pred: me?.prediction ?? '?', wins: me?.tricksWon ?? 0 })
-              : t('game.myStatsDash')}
-          </span>
-        </div>
-        <div className="hand-cards hand-cards-lg">
-          {myHand.map((card) => (
-            <PlayingCard key={card.id} card={card} size="lg" />
-          ))}
-        </div>
       </div>
     </div>
   );
