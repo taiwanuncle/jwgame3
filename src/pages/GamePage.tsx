@@ -1,4 +1,24 @@
 import { useState, useEffect, useRef } from 'react';
+
+/** Live countdown hook — re-renders every second while timer is active */
+function useCountdown(timerEnd: number | null | undefined): number | null {
+  const [timeLeft, setTimeLeft] = useState<number | null>(() =>
+    timerEnd ? Math.max(0, Math.ceil((timerEnd - Date.now()) / 1000)) : null
+  );
+
+  useEffect(() => {
+    if (!timerEnd) {
+      setTimeLeft(null);
+      return;
+    }
+    const update = () => setTimeLeft(Math.max(0, Math.ceil((timerEnd - Date.now()) / 1000)));
+    update();
+    const iv = setInterval(update, 500);
+    return () => clearInterval(iv);
+  }, [timerEnd]);
+
+  return timeLeft;
+}
 import { useTranslation } from 'react-i18next';
 import type { useSocket } from '../hooks/useSocket';
 import type { ToastItem } from '../components/Toast';
@@ -309,7 +329,7 @@ function PredictionOverlay({ gs, sock, addToast }: { gs: NonNullable<Sock['gameS
     addToast(t('game.predSubmitToast', { count: pred }), 'info');
   }
 
-  const timeLeft = gs.timerEnd ? Math.max(0, Math.ceil((gs.timerEnd - Date.now()) / 1000)) : null;
+  const timeLeft = useCountdown(gs.timerEnd);
 
   // Build prediction order (from lead player clockwise)
   const roundLeaderId = gs.roundLeadPlayerId;
@@ -471,7 +491,7 @@ function TrickView({ gs, sock, addToast }: { gs: NonNullable<Sock['gameState']>;
     sock.playCard(card.id);
   }
 
-  const timeLeft = gs.timerEnd ? Math.max(0, Math.ceil((gs.timerEnd - Date.now()) / 1000)) : null;
+  const timeLeft = useCountdown(gs.timerEnd);
   const isTrickResult = gs.phase === 'trick_result';
   const trickWinner = sock.trickResult;
 
