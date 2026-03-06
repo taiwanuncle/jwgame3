@@ -279,52 +279,138 @@ function DiceOverlay({ sock }: { sock: Sock }) {
   );
 }
 
-// ===================== PREDICTION =====================
+// ===================== PREDICTION (Sequential) =====================
 function PredictionOverlay({ gs, sock, addToast }: { gs: NonNullable<Sock['gameState']>; sock: Sock; addToast: Props['addToast'] }) {
   const { t } = useTranslation();
   const [pred, setPred] = useState(0);
   const me = gs.players.find((p) => p.id === gs.myId);
   const submitted = me?.predictionSubmitted ?? false;
-  const revealed = gs.players.every((p) => p.predictionSubmitted && p.prediction !== null);
   const myHand = me?.hand || [];
+  const allDone = gs.players.every((p) => p.predictionSubmitted);
+  const isMyTurn = gs.currentPredictionTurnPlayerId === gs.myId && !submitted;
   const playedRef = useRef(false);
 
   useEffect(() => {
-    if (revealed && !playedRef.current) {
+    if (allDone && !playedRef.current) {
       playedRef.current = true;
       playPredictionReveal();
     }
-  }, [revealed]);
+  }, [allDone]);
+
+  // Play sound when it becomes my turn
+  useEffect(() => {
+    if (isMyTurn) {
+      playMyTurn();
+    }
+  }, [isMyTurn]);
 
   function handleSubmit() {
-    if (submitted) return;
+    if (submitted || !isMyTurn) return;
     sock.submitPrediction(pred);
     addToast(t('game.predSubmitToast', { count: pred }), 'info');
   }
 
   const timeLeft = gs.timerEnd ? Math.max(0, Math.ceil((gs.timerEnd - Date.now()) / 1000)) : null;
 
-  // Leader & order info
+  // Build prediction order for display (from lead player clockwise)
   const roundLeaderId = gs.roundLeadPlayerId;
-  const meIsLeader = roundLeaderId === gs.myId;
   const leaderIdx = gs.players.findIndex(p => p.id === roundLeaderId);
-  const myIdx = gs.players.findIndex(p => p.id === gs.myId);
   const playerCount = gs.players.length;
-  const myOrder = leaderIdx >= 0 && myIdx >= 0
-    ? ((myIdx - leaderIdx + playerCount) % playerCount) + 1
-    : null;
-  const leaderPlayer = gs.players.find(p => p.id === roundLeaderId);
-  const leaderName = leaderPlayer ? displayName(leaderPlayer, t) : '';
+  const orderedPlayers = [];
+  for (let i = 0; i < playerCount; i++) {
+    const idx = (leaderIdx + i) % playerCount;
+    orderedPlayers.push(gs.players[idx]);
+  }
 
   return (
-    <div className="prediction-panel">
-      <div className="my-hand-display">
-        <div className="hand-header">
-          <label>{t('game.myHand')}</label>
-          <span className="order-info">
-            {meIsLeader
-              ? t('game.iAmLeader')
-              : t('game.leaderInfo', { leader: leaderName, order: myOrder })}
+    <div className="prediction-panel prediction-sequential">
+      {/* Opponents row — show prediction status like trick view */}
+      <div className="opponents-row">
+        {orderedPlayers.filter(p => p.id !== gs.myId).map((p) => {
+          const isCurrentTurn = gs.currentPredictionTurnPlayerId === p.id;
+          const isLeader = gs.roundLeadPlayerId === p.id;
+          return (
+            <div key={p.id} className={`opponent-card ${isCurrentTurn ? 'opponent-active' : ''} ${!p.connected ? 'opponent-dc' : ''}`}>
+              {isLeader && <span className="leader-badge">{t('game.leader')}</span>}
+              <img className="chr-avatar opp-chr" src={getAvatarSrc(p.avatarIndex)} alt="" />
+              <span className="opp-name">{displayName(p, t)}</span>
+              <div className="opp-stats">
+                <span className="opp-pred">
+                  {p.predictionSubmitted
+                    ? t('game.prediction', { value: p.prediction })
+                    : t('game.predDash')}
+                </span>
+                <span className="opp-wins">
+                  {p.predictionSubmitted
+                    ? t('game.wins', { value: p.tricksWon })
+                    : t('game.winsDash')}
+                </span>
+              </div>
+              {!p.connected && <span className="dc-badge">{t('game.disconnected')}</span>}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Center area */}
+      <div className="prediction-center glass">
+        {allDone ? (
+          <>
+            <h3>{t('game.predAllDone')}</h3>
+            <div className="pred-reveals">
+              {orderedPlayers.map((p) => (
+                <div key={p.id} className="pred-reveal-item">
+                  <span>{displayName(p, t)}</span>
+                  <span className="pred-reveal-num">{p.prediction}</span>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : isMyTurn ? (
+          <div className="prediction-selector-inner">
+            <h3>{t('game.howManyWins')}</h3>
+            <div className="pred-numbers">
+              {Array.from({ length: gs.cardsThisRound + 1 }, (_, i) => (
+                <button
+                  key={i}
+                  className={`pred-btn ${pred === i ? 'pred-selected' : ''}`}
+                  onClick={() => setPred(i)}
+                >{i}</button>
+              ))}
+            </div>
+            <button className="btn btn-primary" onClick={handleSubmit}>
+              {t('game.predictBtn', { count: pred })}
+            </button>
+            {timeLeft !== null && timeLeft > 0 && (
+              <div className="timer-bar">
+                <div className="timer-fill" style={{ width: `${(timeLeft / 20) * 100}%` }} />
+                <span className="timer-text">{t('game.seconds', { n: timeLeft })}</span>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="prediction-waiting-seq">
+            <h3>{t('game.predSequentialMsg')}</h3>
+            {gs.currentPredictionTurnPlayerId && (() => {
+              const curPlayer = gs.players.find(p => p.id === gs.currentPredictionTurnPlayerId);
+              return curPlayer ? (
+                <p className="pred-current-turn">{t('game.predCurrentTurn', { name: displayName(curPlayer, t) })}</p>
+              ) : null;
+            })()}
+          </div>
+        )}
+      </div>
+
+      {/* My hand & info */}
+      <div className="my-hand-section">
+        <div className="my-player-info">
+          {gs.roundLeadPlayerId === gs.myId && <span className="leader-badge">{t('game.leader')}</span>}
+          <img className="chr-avatar my-chr" src={getAvatarSrc(me?.avatarIndex || 0)} alt="" />
+          <span className="my-name">{me ? displayName(me, t) : ''}</span>
+          <span className="my-stats">
+            {submitted
+              ? t('game.myStats', { pred: me?.prediction ?? '?', wins: me?.tricksWon ?? 0 })
+              : t('game.myStatsDash')}
           </span>
         </div>
         <div className="hand-cards hand-cards-lg">
@@ -333,55 +419,6 @@ function PredictionOverlay({ gs, sock, addToast }: { gs: NonNullable<Sock['gameS
           ))}
         </div>
       </div>
-
-      {!submitted ? (
-        <div className="prediction-selector glass">
-          <h3>{t('game.howManyWins')}</h3>
-          <div className="pred-numbers">
-            {Array.from({ length: gs.cardsThisRound + 1 }, (_, i) => (
-              <button
-                key={i}
-                className={`pred-btn ${pred === i ? 'pred-selected' : ''}`}
-                onClick={() => setPred(i)}
-              >{i}</button>
-            ))}
-          </div>
-          <button className="btn btn-primary" onClick={handleSubmit}>
-            {t('game.predictBtn', { count: pred })}
-          </button>
-          {timeLeft !== null && timeLeft > 0 && (
-            <div className="timer-bar">
-              <div className="timer-fill" style={{ width: `${(timeLeft / 20) * 100}%` }} />
-              <span className="timer-text">{t('game.seconds', { n: timeLeft })}</span>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="prediction-waiting glass">
-          {revealed ? (
-            <>
-              <h3>{t('game.predRevealed')}</h3>
-              <div className="pred-reveals">
-                {gs.players.map((p) => (
-                  <div key={p.id} className="pred-reveal-item">
-                    <span>{displayName(p, t)}</span>
-                    <span className="pred-reveal-num">{p.prediction}</span>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <h3>{t('game.waitingPlayers')}</h3>
-          )}
-          <div className="submitted-badges">
-            {gs.players.map((p) => (
-              <span key={p.id} className={`sub-badge ${p.predictionSubmitted ? 'sub-done' : ''}`}>
-                {displayName(p, t)} {p.predictionSubmitted ? '✓' : '...'}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

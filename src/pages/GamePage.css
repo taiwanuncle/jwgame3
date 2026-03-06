@@ -228,6 +228,11 @@
   padding: var(--gap-lg);
   overflow-y: auto;
 }
+.prediction-sequential {
+  justify-content: flex-start;
+  gap: var(--gap-sm);
+  overflow: hidden;
+}
 .my-hand-display {
   text-align: center;
 }
@@ -263,6 +268,40 @@
 }
 .hand-cards-lg {
   gap: var(--gap-md);
+}
+
+.prediction-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0 var(--gap-md);
+  padding: var(--gap-lg);
+  min-height: 120px;
+  width: 100%;
+  max-width: 440px;
+}
+.prediction-selector-inner {
+  text-align: center;
+  width: 100%;
+}
+.prediction-selector-inner h3 {
+  margin-bottom: var(--gap-lg);
+}
+.prediction-waiting-seq {
+  text-align: center;
+}
+.prediction-waiting-seq h3 {
+  margin-bottom: var(--gap-md);
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+.pred-current-turn {
+  color: var(--accent-light);
+  font-weight: 700;
+  font-size: 1.1rem;
+  animation: glow-pulse 1.5s ease infinite;
 }
 
 .prediction-selector,
@@ -625,38 +664,48 @@
   .game-header {
     padding: var(--gap-xs) var(--gap-sm);
   }
+  .round-info {
+    font-size: 0.7rem;
+  }
   .opponents-row {
     gap: 4px;
     padding: var(--gap-xs) var(--gap-sm);
   }
   .opponent-card {
     padding: var(--gap-xs) var(--gap-sm);
-    min-width: 60px;
+    min-width: 56px;
     font-size: 0.7rem;
   }
-  .opp-avatar {
-    font-size: 16px;
+  .opp-chr {
+    width: 22px;
+    height: 22px;
   }
   .opp-name {
-    font-size: 0.68rem;
+    font-size: 0.65rem;
   }
   .opp-stats {
-    font-size: 0.6rem;
+    font-size: 0.58rem;
+    gap: 4px;
   }
   .trick-table {
     padding: var(--gap-sm);
     margin: var(--gap-xs) var(--gap-sm);
-    min-height: 100px;
+    min-height: 90px;
   }
   .trick-info {
     font-size: 0.75rem;
     gap: var(--gap-sm);
   }
   .trick-cards {
-    gap: var(--gap-sm);
+    gap: 4px;
   }
   .trick-card-name {
     font-size: 0.6rem;
+  }
+  .trick-card-empty .card-placeholder {
+    width: 60px;
+    height: 81px;
+    border-radius: 8px;
   }
   .my-hand-section {
     padding: var(--gap-xs) var(--gap-sm) var(--gap-md);
@@ -664,9 +713,12 @@
   .hand-interactive {
     gap: 2px;
   }
+  .hand-cards-lg {
+    gap: var(--gap-sm);
+  }
   .prediction-selector,
   .prediction-waiting {
-    padding: var(--gap-lg);
+    padding: var(--gap-md);
     max-width: 100%;
   }
   .pred-btn {
@@ -679,5 +731,35 @@
   }
   .score-table {
     font-size: 0.75rem;
+  }
+  .prediction-panel {
+    gap: var(--gap-md);
+    padding: var(--gap-sm);
+  }
+}
+
+@media (max-width: 360px) {
+  .opponent-card {
+    min-width: 48px;
+    padding: 3px 4px;
+  }
+  .opp-chr {
+    width: 20px;
+    height: 20px;
+  }
+  .opp-name {
+    font-size: 0.6rem;
+  }
+  .opp-stats {
+    font-size: 0.55rem;
+  }
+  .trick-card-empty .card-placeholder {
+    width: 50px;
+    height: 68px;
+  }
+  .pred-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 0.9rem;
   }
 }

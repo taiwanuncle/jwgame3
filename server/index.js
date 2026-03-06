@@ -257,6 +257,10 @@ function createRoom(hostId, hostNickname, hostAvatarIndex, roomOptions) {
     timerEnd: null,
     turnTimer: null,
     actionLog: [],
+    // Sequential prediction
+    predictionOrder: [],
+    currentPredictionIndex: 0,
+    currentPredictionTurnPlayerId: null,
   };
   rooms.set(roomCode, room);
   return room;
@@ -356,6 +360,7 @@ function buildPersonalState(room, playerId) {
     diceResults: room.diceResults,
     timerEnd: room.timerEnd,
     actionLog: room.actionLog.slice(-20),
+    currentPredictionTurnPlayerId: room.currentPredictionTurnPlayerId,
   };
 }
 
@@ -510,40 +515,84 @@ function startNextRound(room) {
 
 function startPredictionPhase(room) {
   room.phase = PHASES.PREDICTION;
-  room.timerEnd = Date.now() + PREDICTION_TIMER_MS;
+
+  // Build sequential prediction order starting from the lead player (clockwise)
+  const leadIdx = room.currentRoundLeadIndex;
+  const numPlayers = room.players.length;
+  room.predictionOrder = [];
+  for (let i = 0; i < numPlayers; i++) {
+    const idx = (leadIdx + i) % numPlayers;
+    room.predictionOrder.push(room.players[idx].id);
+  }
+  room.currentPredictionIndex = 0;
+  room.currentPredictionTurnPlayerId = room.predictionOrder[0];
 
   emitPersonalStates(room);
 
-  // Schedule bot predictions
-  for (const p of room.players) {
-    if (p.isBot) {
-      const botRef = p;
-      const delay = BOT_DELAY_MIN + Math.random() * BOT_DELAY_RANGE;
-      setTimeout(() => {
-        if (room.phase === PHASES.PREDICTION && !botRef.predictionSubmitted) {
-          const pred = botPrediction(room, botRef);
-          submitPlayerPrediction(room, botRef.id, pred);
-        }
-      }, delay);
-    }
+  // Start the first player's prediction turn
+  startPredictionTurn(room);
+}
+
+function startPredictionTurn(room) {
+  if (room.phase !== PHASES.PREDICTION) return;
+
+  const currentPlayerId = room.currentPredictionTurnPlayerId;
+  const player = getPlayerById(room, currentPlayerId);
+  if (!player) return;
+
+  // Bot: schedule prediction after delay
+  if (player.isBot) {
+    const delay = BOT_DELAY_MIN + Math.random() * BOT_DELAY_RANGE;
+    clearRoomTimer(room);
+    room.timerEnd = null;
+    emitPersonalStates(room);
+    setTimeout(() => {
+      if (room.phase === PHASES.PREDICTION && !player.predictionSubmitted
+          && room.currentPredictionTurnPlayerId === currentPlayerId) {
+        const pred = botPrediction(room, player);
+        submitPlayerPrediction(room, player.id, pred);
+      }
+    }, delay);
+    return;
   }
 
+  // Disconnected human: auto-submit 0 after short delay
+  if (!isPlayerConnected(room, currentPlayerId)) {
+    clearRoomTimer(room);
+    room.timerEnd = null;
+    emitPersonalStates(room);
+    setTimeout(() => {
+      if (room.phase === PHASES.PREDICTION && !player.predictionSubmitted
+          && room.currentPredictionTurnPlayerId === currentPlayerId) {
+        player.prediction = 0;
+        player.predictionSubmitted = true;
+        addActionLog(room, player.nickname + '님의 예측: 시간 초과 (0으로 자동 제출)', 'server.predTimeout', { name: player.nickname });
+        advancePredictionTurn(room);
+      }
+    }, DISCONNECTED_TIMER_MS);
+    return;
+  }
+
+  // Connected human: set timer
   clearRoomTimer(room);
+  room.timerEnd = Date.now() + PREDICTION_TIMER_MS;
+  emitPersonalStates(room);
+
   room.turnTimer = setTimeout(() => {
     if (room.phase !== PHASES.PREDICTION) return;
-    for (const p of room.players) {
-      if (!p.predictionSubmitted) {
-        p.prediction = 0;
-        p.predictionSubmitted = true;
-        addActionLog(room, p.nickname + '님의 예측: 시간 초과 (0으로 자동 제출)', 'server.predTimeout', { name: p.nickname });
-      }
+    if (room.currentPredictionTurnPlayerId !== currentPlayerId) return;
+    if (!player.predictionSubmitted) {
+      player.prediction = 0;
+      player.predictionSubmitted = true;
+      addActionLog(room, player.nickname + '님의 예측: 시간 초과 (0으로 자동 제출)', 'server.predTimeout', { name: player.nickname });
+      advancePredictionTurn(room);
     }
-    revealPredictions(room);
   }, PREDICTION_TIMER_MS);
 }
 
 function submitPlayerPrediction(room, playerId, prediction) {
   if (room.phase !== PHASES.PREDICTION) return;
+  if (room.currentPredictionTurnPlayerId !== playerId) return;
 
   const player = getPlayerById(room, playerId);
   if (!player) return;
@@ -553,17 +602,28 @@ function submitPlayerPrediction(room, playerId, prediction) {
   player.prediction = pred;
   player.predictionSubmitted = true;
 
-  addActionLog(room, player.nickname + '님이 예측을 제출했습니다.', 'server.predSubmitted', { name: player.nickname });
-  emitPersonalStates(room);
+  addActionLog(room, player.nickname + '님이 ' + pred + '을(를) 예측했습니다.', 'server.predSubmittedValue', { name: player.nickname, value: pred });
 
-  const allSubmitted = room.players.every(p => p.predictionSubmitted);
-  if (allSubmitted) {
-    clearRoomTimer(room);
-    revealPredictions(room);
-  }
+  advancePredictionTurn(room);
 }
 
-function revealPredictions(room) {
+function advancePredictionTurn(room) {
+  clearRoomTimer(room);
+  room.currentPredictionIndex++;
+
+  if (room.currentPredictionIndex >= room.predictionOrder.length) {
+    // All predictions done
+    room.currentPredictionTurnPlayerId = null;
+    finishPredictions(room);
+    return;
+  }
+
+  room.currentPredictionTurnPlayerId = room.predictionOrder[room.currentPredictionIndex];
+  emitPersonalStates(room);
+  startPredictionTurn(room);
+}
+
+function finishPredictions(room) {
   const predictions = room.players.map(p => ({
     playerId: p.id,
     playerName: p.nickname,
@@ -577,11 +637,13 @@ function revealPredictions(room) {
     'server.predsRevealed', { details: predictions.map(p => p.playerName + '(' + p.prediction + ')').join(', ') }
   );
 
+  emitPersonalStates(room);
+
   setTimeout(() => {
     if (room.phase === PHASES.PREDICTION) {
       startNextTrick(room);
     }
-  }, 2500);
+  }, 2000);
 }
 
 // ----- TRICK PLAY PHASE -----
@@ -1210,6 +1272,9 @@ io.on('connection', (socket) => {
     room.diceResults = [];
     room.timerEnd = null;
     room.actionLog = [];
+    room.predictionOrder = [];
+    room.currentPredictionIndex = 0;
+    room.currentPredictionTurnPlayerId = null;
     clearRoomTimer(room);
 
     for (const p of room.players) {

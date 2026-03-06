@@ -165,6 +165,9 @@ export interface GameState {
   // Timer
   timerEnd: number | null;
 
+  // Sequential prediction
+  currentPredictionTurnPlayerId: string | null;
+
   // Action log
   actionLog: ActionLogEntry[];
 }
