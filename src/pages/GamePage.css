@@ -548,6 +548,31 @@
   border: 2px dashed var(--glass-border);
   background: transparent;
 }
+/* Bigger placeholders for fewer players (matching card-lg) */
+.game-page[data-players="3"] .trick-card-empty .card-placeholder,
+.game-page[data-players="4"] .trick-card-empty .card-placeholder {
+  width: 104px;
+  height: 141px;
+}
+/* Bigger opponent cards for fewer players */
+.game-page[data-players="3"] .opponent-card,
+.game-page[data-players="4"] .opponent-card {
+  padding: var(--gap-sm) var(--gap-lg);
+  min-width: 100px;
+}
+.game-page[data-players="3"] .opp-chr,
+.game-page[data-players="4"] .opp-chr {
+  width: 36px;
+  height: 36px;
+}
+.game-page[data-players="3"] .opp-name,
+.game-page[data-players="4"] .opp-name {
+  font-size: 0.85rem;
+}
+.game-page[data-players="3"] .opp-stats,
+.game-page[data-players="4"] .opp-stats {
+  font-size: 0.78rem;
+}
 .trick-winner-announce {
   margin-top: var(--gap-md);
   font-weight: 700;
@@ -707,6 +732,30 @@
     width: 60px;
     height: 81px;
     border-radius: 8px;
+  }
+  /* Few players on mobile: moderate size, not full desktop lg */
+  .game-page[data-players="3"] .trick-card-empty .card-placeholder,
+  .game-page[data-players="4"] .trick-card-empty .card-placeholder {
+    width: 72px;
+    height: 98px;
+  }
+  .game-page[data-players="3"] .opponent-card,
+  .game-page[data-players="4"] .opponent-card {
+    padding: var(--gap-xs) var(--gap-md);
+    min-width: 72px;
+  }
+  .game-page[data-players="3"] .opp-chr,
+  .game-page[data-players="4"] .opp-chr {
+    width: 28px;
+    height: 28px;
+  }
+  .game-page[data-players="3"] .opp-name,
+  .game-page[data-players="4"] .opp-name {
+    font-size: 0.72rem;
+  }
+  .game-page[data-players="3"] .opp-stats,
+  .game-page[data-players="4"] .opp-stats {
+    font-size: 0.65rem;
   }
   .my-hand-section {
     padding: var(--gap-xs) var(--gap-sm) var(--gap-md);

@@ -32,7 +32,7 @@ export default function GamePage({ sock, addToast }: Props) {
   const { phase } = gs;
 
   return (
-    <div className="game-page">
+    <div className="game-page" data-players={gs.players.length}>
       <GameHeader gs={gs} sock={sock} />
 
       {phase === 'dice_roll' && <DiceOverlay sock={sock} />}
@@ -497,7 +497,7 @@ function TrickView({ gs, sock, addToast }: { gs: NonNullable<Sock['gameState']>;
         })}
       </div>
 
-      {/* Trick table — cards are md size now (bigger) */}
+      {/* Trick table — card size adapts to player count */}
       <div className="trick-table glass">
         <div className="trick-info">
           <span>{t('game.trickInfo', { current: gs.currentTrickNumber, total: gs.totalTricksThisRound })}</span>
@@ -514,6 +514,7 @@ function TrickView({ gs, sock, addToast }: { gs: NonNullable<Sock['gameState']>;
             <div key={tc.playerId} className="trick-card-slot">
               <PlayingCard
                 card={tc.card}
+                size={gs.players.length <= 4 ? 'lg' : 'md'}
                 winner={isTrickResult && trickWinner?.winnerId === tc.playerId}
               />
               <span className="trick-card-name">{tc.playerName}</span>
