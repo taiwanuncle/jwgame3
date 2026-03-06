@@ -372,20 +372,23 @@
 
 .pred-reveals {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: var(--gap-sm);
-  margin-bottom: var(--gap-lg);
+  margin-bottom: var(--gap-md);
+  width: 100%;
 }
 .pred-reveal-item {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: var(--gap-sm) var(--gap-md);
+  gap: 6px;
+  padding: 4px 12px;
   background: var(--bg-card);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
 }
 .pred-reveal-num {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 800;
   color: var(--accent-light);
 }
