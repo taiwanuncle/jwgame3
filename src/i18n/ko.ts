@@ -8,6 +8,15 @@ const ko = {
       gameRules: '게임 규칙',
       me: '나',
     },
+    kakao: {
+      title: '카카오톡 브라우저 안내',
+      text1: '카카오톡 브라우저에서 접속하셨습니다.',
+      text2: '카톡 알림이 오면 게임이 튕길 수 있어요!',
+      text3: '다른 브라우저로 열면 안정적으로 즐길 수 있습니다.',
+      openExternal: '🌐 외부 브라우저로 열기',
+      hideToday: '오늘 하루 보지 않기',
+      close: '닫기',
+    },
     lobby: {
       title: '예는 Yeah!!로',
       subtitle: '트릭테이킹 카드 게임 (说到做到)',

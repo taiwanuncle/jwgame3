@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { useSocket } from '../hooks/useSocket';
 import type { ToastItem } from '../components/Toast';
@@ -32,6 +32,41 @@ export default function LobbyPage({ sock, addToast }: Props) {
   const [showInfo, setShowInfo] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [showPlaylist, setShowPlaylist] = useState(false);
+  const [showKakaoWarning, setShowKakaoWarning] = useState(false);
+  const [kakaoHideToday, setKakaoHideToday] = useState(false);
+
+  // Detect KakaoTalk in-app browser
+  useEffect(() => {
+    const ua = navigator.userAgent.toLowerCase();
+    const isKakao = ua.includes('kakaotalk') || ua.includes('kakao');
+    if (isKakao) {
+      const hideUntil = localStorage.getItem('kakao_warn_hide');
+      if (hideUntil) {
+        if (new Date() < new Date(hideUntil)) return;
+      }
+      setShowKakaoWarning(true);
+    }
+  }, []);
+
+  function handleOpenExternal() {
+    const url = window.location.href;
+    const ua = navigator.userAgent.toLowerCase();
+    const isIOS = /iphone|ipad|ipod/.test(ua);
+    if (isIOS) {
+      window.location.href = `kakaotalk://web/openExternal?url=${encodeURIComponent(url)}`;
+    } else {
+      window.location.href = `intent://${url.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;end`;
+    }
+  }
+
+  function handleKakaoClose() {
+    if (kakaoHideToday) {
+      const today = new Date();
+      today.setHours(23, 59, 59, 999);
+      localStorage.setItem('kakao_warn_hide', today.toISOString());
+    }
+    setShowKakaoWarning(false);
+  }
 
   function saveNickname(name: string) {
     setNickname(name);
@@ -103,6 +138,36 @@ export default function LobbyPage({ sock, addToast }: Props) {
 
         {showInfo && <InfoModal onClose={() => setShowInfo(false)} />}
         {showPlaylist && <PlaylistModal onClose={() => setShowPlaylist(false)} />}
+        {showKakaoWarning && (
+          <div className="kakao-overlay">
+            <div className="kakao-popup">
+              <div className="kakao-popup-icon">⚠️</div>
+              <h3 className="kakao-popup-title">{t('kakao.title')}</h3>
+              <p className="kakao-popup-text">
+                {t('kakao.text1')}<br />
+                {t('kakao.text2')}<br />
+                <strong>{t('kakao.text3')}</strong>
+              </p>
+              <button className="btn btn-primary kakao-popup-btn" onClick={handleOpenExternal}>
+                {t('kakao.openExternal')}
+              </button>
+              <div className="kakao-popup-bottom">
+                <label className="kakao-popup-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={kakaoHideToday}
+                    onChange={(e) => setKakaoHideToday(e.target.checked)}
+                  />
+                  <span>{t('kakao.hideToday')}</span>
+                </label>
+                <button className="btn btn-ghost kakao-popup-close" onClick={handleKakaoClose}>
+                  {t('kakao.close')}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {showAbout && (
           <div className="overlay" onClick={() => setShowAbout(false)}>
             <div className="modal about-modal" onClick={(e) => e.stopPropagation()}>

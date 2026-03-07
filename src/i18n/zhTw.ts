@@ -8,6 +8,15 @@ const zhTw = {
       gameRules: '遊戲規則',
       me: '我',
     },
+    kakao: {
+      title: 'KakaoTalk 瀏覽器提示',
+      text1: '您正在使用 KakaoTalk 瀏覽器。',
+      text2: '收到訊息時遊戲可能會中斷！',
+      text3: '使用外部瀏覽器可以更穩定地遊玩。',
+      openExternal: '🌐 用外部瀏覽器開啟',
+      hideToday: '今天不再顯示',
+      close: '關閉',
+    },
     lobby: {
       title: '예는 Yeah!!로',
       subtitle: '吃墩紙牌遊戲 (说到做到)',
