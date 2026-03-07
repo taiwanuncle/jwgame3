@@ -465,7 +465,8 @@ function TrickView({ gs, sock, addToast }: { gs: NonNullable<Sock['gameState']>;
     if (!leadSuit) {
       myHand.forEach((c) => validCardIds.add(c.id));
     } else {
-      const suitCards = myHand.filter((c) => c.suit === leadSuit);
+      // Heart Priority Rule: hearts (trump) can ALWAYS be played
+      const suitCards = myHand.filter((c) => c.suit === leadSuit || c.suit === 'hearts');
       if (suitCards.length > 0) {
         suitCards.forEach((c) => validCardIds.add(c.id));
       } else {

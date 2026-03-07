@@ -51,6 +51,7 @@ export default function InfoModal({ onClose }: Props) {
             <h3>{t('info.trickRulesTitle')}</h3>
             <ul>
               <li>{t('info.trick1')}</li>
+              <li><strong>{t('info.trick1b')}</strong></li>
               <li>{t('info.trick2')}</li>
               <li>{t('info.trick3')}</li>
               <li>{t('info.trick4')}</li>

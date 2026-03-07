@@ -188,7 +188,8 @@ function cardToString(card) {
 
 function getValidCards(hand, leadSuit) {
   if (!leadSuit) return hand;
-  const followCards = hand.filter(c => c.suit === leadSuit);
+  // Heart Priority Rule: hearts (trump) can ALWAYS be played
+  const followCards = hand.filter(c => c.suit === leadSuit || c.suit === 'hearts');
   if (followCards.length > 0) return followCards;
   return hand;
 }
@@ -716,13 +717,15 @@ function playCard(room, playerId, cardId) {
 
   const card = player.hand[cardIndex];
 
-  // Validate: must follow lead suit if possible
+  // Validate: must follow lead suit if possible (Heart Priority Rule: hearts always allowed)
   if (room.trickLeadSuit) {
-    const hasLeadSuit = player.hand.some(c => c.suit === room.trickLeadSuit);
-    if (hasLeadSuit && card.suit !== room.trickLeadSuit) {
-      const sock = getSocketForPlayer(room, playerId);
-      if (sock) sock.emit('error_msg', { message: '리드 수트를 따라야 합니다!', messageKey: 'server.mustFollowLead' });
-      return;
+    if (card.suit !== room.trickLeadSuit && card.suit !== 'hearts') {
+      const hasLeadSuit = player.hand.some(c => c.suit === room.trickLeadSuit);
+      if (hasLeadSuit) {
+        const sock = getSocketForPlayer(room, playerId);
+        if (sock) sock.emit('error_msg', { message: '리드 수트를 따라야 합니다!', messageKey: 'server.mustFollowLead' });
+        return;
+      }
     }
   }
 
