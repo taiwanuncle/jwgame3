@@ -188,10 +188,10 @@ function cardToString(card) {
 
 function getValidCards(hand, leadSuit) {
   if (!leadSuit) return hand;
-  // Heart Priority Rule: hearts (trump) can ALWAYS be played
-  const followCards = hand.filter(c => c.suit === leadSuit || c.suit === 'hearts');
-  if (followCards.length > 0) return followCards;
-  return hand;
+  const hasLeadSuit = hand.some(c => c.suit === leadSuit);
+  if (!hasLeadSuit) return hand; // no lead suit → any card allowed
+  // Heart Priority Rule: lead suit + hearts always valid
+  return hand.filter(c => c.suit === leadSuit || c.suit === 'hearts');
 }
 
 function determineTrickWinner(trickCards, leadSuit) {

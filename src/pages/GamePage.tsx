@@ -465,12 +465,14 @@ function TrickView({ gs, sock, addToast }: { gs: NonNullable<Sock['gameState']>;
     if (!leadSuit) {
       myHand.forEach((c) => validCardIds.add(c.id));
     } else {
-      // Heart Priority Rule: hearts (trump) can ALWAYS be played
-      const suitCards = myHand.filter((c) => c.suit === leadSuit || c.suit === 'hearts');
-      if (suitCards.length > 0) {
-        suitCards.forEach((c) => validCardIds.add(c.id));
-      } else {
+      const hasLeadSuit = myHand.some((c) => c.suit === leadSuit);
+      if (!hasLeadSuit) {
+        // no lead suit → any card allowed
         myHand.forEach((c) => validCardIds.add(c.id));
+      } else {
+        // Heart Priority Rule: lead suit + hearts always valid
+        myHand.filter((c) => c.suit === leadSuit || c.suit === 'hearts')
+          .forEach((c) => validCardIds.add(c.id));
       }
     }
   }
